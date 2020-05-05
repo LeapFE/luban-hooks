@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react",
+    "allowJs": false,
+    "moduleResolution": "node",
+    "skipDefaultLibCheck": true,
+    "sourceMap": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "removeComments": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "downlevelIteration": true,
+    "lib": [
+      "ES2017",
+      "ES2016",
+      "ES2015",
+      "ES5",
+    ],
+    "types": [
+      "node"
+    ],
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": true,
+    "alwaysStrict": false,
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./node_modules/*/index"]
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+  },
+  "exclude": [
+    "node_modules",
+    "packages/**/**/node_modules",
+    "packages/**/**/__test__",
+    "packages/**/**/src/template/**",
+    "./*.js"
+  ]
+}
