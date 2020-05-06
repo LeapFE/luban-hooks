@@ -1,5 +1,6 @@
 import { useRequest } from "./useRequest";
+import { UseRequestProvider } from "./provider";
 
-export { useRequest };
+export { useRequest, UseRequestProvider };
 
 export default useRequest;
