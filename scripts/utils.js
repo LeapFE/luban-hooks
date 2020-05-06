@@ -15,8 +15,8 @@ module.exports = {
     const changePackagesList = new Set();
 
     changedFiles.forEach((fileName) => {
-      if (/(hooks|useRequest)/.test(fileName)) {
-        const matchedResult = fileName.match(/\/cli-?(\w|-){0,20}\//);
+      if (/(hooks|use-request)/.test(fileName)) {
+        const matchedResult = fileName.match(/\/use-?(\w|-){0,20}\//);
         if (Array.isArray(matchedResult)) {
           const matchedPackageName = matchedResult[0];
           changePackagesList.add(matchedPackageName.replace(/\//g, ""));

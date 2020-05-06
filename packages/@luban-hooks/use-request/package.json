@@ -30,7 +30,7 @@
     "test:coverage": "jest --coverage --color",
     "test:update": "jest -u",
     "eslint": "eslint src/**/*.{ts,tsx}",
-    "check-type": "tsc --noEmit",
+    "check:type": "tsc --noEmit",
     "format": "prettier --write src/**/*.{ts,tsx}",
     "clean": "rimraf es && rimraf lib",
     "pre:release": "npm run clean && npm run format && npm run eslint",

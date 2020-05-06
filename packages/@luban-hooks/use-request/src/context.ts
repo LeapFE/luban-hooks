@@ -12,8 +12,8 @@ function generateGlobalOptionContext<R>(
   // const initContext = Object.create({ ...value });
 
   if (value) {
-    if (typeof value.checkResponse === "function") {
-      initContext.checkResponse = value.checkResponse;
+    if (typeof value.verifyResponse === "function") {
+      initContext.verifyResponse = value.verifyResponse;
     }
   }
 

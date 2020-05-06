@@ -5,6 +5,7 @@
     "baseUrl": "./",
     "sourceMap": false,
     "declaration": true,
+    "lib": ["DOM"]
   },
   "include": [
     "./src",

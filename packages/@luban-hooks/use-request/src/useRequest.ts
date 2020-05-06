@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import { useState, useEffect, useCallback, useContext, useMemo, useRef } from "react";
 import { AxiosResponse, AxiosError } from "axios";
 
 import {
@@ -18,7 +18,21 @@ import {
 } from "./definition";
 
 import { globalOptionsContext } from "./provider";
-import { getFinalOptions, assignParams } from "./share";
+import {
+  getFinalOptions,
+  assignParams,
+  enhanceError,
+  verifyResponseAsAxiosResponse,
+  ResponseError,
+} from "./share";
+
+type StateRef = {
+  fetching: Fetching;
+  data: any;
+  error: AxiosError | null;
+  params: BasicParams;
+  response: AxiosResponse<any>;
+};
 
 const defaultOptions: OptionWithParamsWithoutFormat<AxiosResponse<{}>, undefined> = {
   manual: false,
@@ -27,7 +41,7 @@ const defaultOptions: OptionWithParamsWithoutFormat<AxiosResponse<{}>, undefined
   defaultLoading: null,
   defaultParams: undefined,
   initialData: {},
-  checkResponse: undefined,
+  verifyResponse: undefined,
 };
 
 // service without params and options without formatter
@@ -55,20 +69,31 @@ function useRequest<R extends AxiosResponse<any>, P extends BasicParams, D, T ex
 ): ResultWithParamsWithFormat<R, D, P, Service<R, P>>;
 
 function useRequest(service: any, options?: any) {
-  // check service return promise and instance function
   if (typeof service !== "function") {
     throw Error(`service ${service} is not a function`);
   }
 
   const isServiceWithParams = useMemo(() => /(?=\()\(\w+\)(?!\))/.test(service.toString()), []);
-  // console.log("%cIsServiceWithParams", "font-size: 18px", isServiceWithParams);
 
   const promisifyService = (args?: any) => {
     return new Promise<AxiosResponse<any>>((resolve, reject) => {
       const result = service(args);
 
       if (typeof result.then === "function") {
-        result.then((res: any) => resolve(res)).catch((e: any) => reject(e));
+        result
+          .then((res: any) => {
+            if (verifyResponseAsAxiosResponse(res)) {
+              resolve(res);
+            } else {
+              reject(
+                new ResponseError(
+                  `service ${service.name ||
+                    "unknown"} returned value is not a valid AxiosResponse, see https://github.com/axios/axios#response-schema`,
+                ),
+              );
+            }
+          })
+          .catch((e: any) => reject(e));
       } else {
         resolve(result);
         console.error(`service function "${service.name}" return value not a Promise`);
@@ -76,15 +101,11 @@ function useRequest(service: any, options?: any) {
     });
   };
 
-  // TODO check options
-
   const globalOptions = useContext(globalOptionsContext);
-  // console.log("%cGlobalOptions", "color: blue; font-size: 16px", globalOptions);
 
-  const { checkResponse: globalCheckResponse } = globalOptions;
+  const { verifyResponse: globalVerifyResponse } = globalOptions;
 
   const _options = getFinalOptions(defaultOptions, options);
-  // console.log("%c_options", "color: orange", _options);
 
   const {
     manual,
@@ -94,22 +115,46 @@ function useRequest(service: any, options?: any) {
     defaultParams,
     initialData,
     formatter,
-    checkResponse,
+    verifyResponse,
   } = _options;
 
-  const [fetching, setFetching] = useState<Fetching>(defaultLoading);
-  const [data, setData] = useState(initialData);
-  const [response, setResponse] = useState({} as AxiosResponse<any>);
-  const [params, setParams] = useState<BasicParams>(defaultParams);
-  const [error, setError] = useState<AxiosError | null>(null);
+  const stateDependenciesRef = useRef({
+    fetching: false,
+    data: false,
+    response: false,
+    error: false,
+    params: false,
+  });
+  const stateRef = useRef<StateRef>({
+    fetching: defaultLoading,
+    data: initialData,
+    response: {} as AxiosResponse<any>,
+    error: null,
+    params: defaultParams,
+  });
 
-  const checkResponseCb = useMemo(() => {
-    if (typeof checkResponse === "function") {
-      return checkResponse;
+  const render = useState<null | {}>(null)[1];
+
+  const dispatch = useCallback((payload: Partial<StateRef>) => {
+    let shouldUpdateState = false;
+    for (const k in payload) {
+      stateRef.current[k] = payload[k];
+      if (stateDependenciesRef.current[k]) {
+        shouldUpdateState = true;
+      }
+    }
+    if (shouldUpdateState) {
+      render({});
+    }
+  }, []);
+
+  const verifyResponseCb = useMemo(() => {
+    if (typeof verifyResponse === "function") {
+      return verifyResponse;
     }
 
-    if (typeof globalCheckResponse === "function") {
-      return globalCheckResponse;
+    if (typeof globalVerifyResponse === "function") {
+      return globalVerifyResponse;
     }
 
     return () => true;
@@ -124,28 +169,23 @@ function useRequest(service: any, options?: any) {
   }, []);
 
   const fetch = useCallback(async (params: BasicParams) => {
-    setParams(undefined);
-    setError(null);
-    setData(initialData);
-    setResponse({} as AxiosResponse<any>);
-
-    setFetching(true);
+    dispatch({ fetching: true });
 
     const assignedParams = assignParams(params, defaultParams);
 
-    setParams(assignedParams);
+    dispatch({ params: assignedParams });
 
     let response: AxiosResponse<any> = {} as AxiosResponse<any>;
 
     try {
       response = await promisifyService(assignedParams);
 
-      setResponse(response);
+      dispatch({ response });
 
-      if (checkResponseCb(response)) {
+      if (verifyResponseCb(response)) {
         const formattedData = formatterCb(response);
 
-        setData(formattedData);
+        dispatch({ data: formattedData });
 
         if (isServiceWithParams) {
           onSuccess(formattedData, assignedParams, response);
@@ -156,23 +196,32 @@ function useRequest(service: any, options?: any) {
         throw Error("response is invalid");
       }
     } catch (error) {
-      setError(error);
+      const enhancedError = error.isAxiosError
+        ? error
+        : enhanceError(error, response.config, response.statusText, response.request, response);
+      dispatch({ error: enhancedError });
+
+      if (error.name === "ResponseError") {
+        console.error(enhancedError);
+      }
 
       if (isServiceWithParams) {
-        onError(error, assignedParams);
+        onError(enhancedError, assignedParams);
       } else {
-        onError(error);
+        onError(enhancedError);
       }
     } finally {
-      setFetching(false);
+      dispatch({ fetching: false });
     }
   }, []);
 
   const reset = useCallback(() => {
-    setData(initialData);
-    setParams(defaultParams);
-    setFetching(defaultLoading);
-    setError(null);
+    dispatch({
+      fetching: defaultLoading,
+      data: initialData,
+      params: defaultParams,
+      error: null,
+    });
   }, []);
 
   const runWithParams = (params?: BasicParams) => {
@@ -184,7 +233,7 @@ function useRequest(service: any, options?: any) {
   };
 
   const refresh = () => {
-    fetch(params);
+    fetch(stateRef.current.params);
   };
 
   useEffect(() => {
@@ -193,15 +242,41 @@ function useRequest(service: any, options?: any) {
     }
   }, []);
 
-  return {
-    loading: fetching || false,
-    data,
-    response,
-    error,
-    reset,
-    refresh,
-    run: isServiceWithParams ? runWithParams : runWithoutParams,
-  };
+  return useMemo(() => {
+    const state = {
+      reset,
+      refresh,
+      run: isServiceWithParams ? runWithParams : runWithoutParams,
+    };
+    Object.defineProperties(state, {
+      loading: {
+        get: () => {
+          stateDependenciesRef.current.fetching = true;
+          return stateRef.current.fetching || false;
+        },
+      },
+      data: {
+        get: () => {
+          stateDependenciesRef.current.data = true;
+          return stateRef.current.data;
+        },
+      },
+      response: {
+        get: () => {
+          stateDependenciesRef.current.response = true;
+          return stateRef.current.response;
+        },
+      },
+      error: {
+        get: () => {
+          stateDependenciesRef.current.error = true;
+          return stateRef.current.error;
+        },
+      },
+    });
+
+    return state;
+  }, [refresh]);
 }
 
 export { useRequest };

@@ -2,7 +2,7 @@
   "name": "luban-hooks",
   "private": true,
   "workspaces": [
-    "packages/@hooks/*"
+    "packages/@luban-hooks/*"
   ],
   "scripts": {
     "eslint:packages": "eslint -c packages/.eslintrc packages/**/*.{ts,tsx}",
@@ -17,7 +17,7 @@
     "test:changed": "node scripts/test.js --onlyChanged",
     "test": "node scripts/test.js",
     "jest-coverage": "yarn jest --coverage --color -i .*@hooks/.*/.*\\.test\\.ts$",
-    "commit": "yarn run test:changed && yarn run format:packages && yarn run build:changed && git-cz",
+    "commit": "yarn run test:changed && yarn run format:packages && git-cz",
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean"
   },
@@ -28,7 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^2.31.0",
     "@typescript-eslint/parser": "^2.31.0",
     "babel-eslint": "^10.0.3",
-    "commitizen": "^4.0.3",
+    "commitizen": "4.0.5",
     "cross-env": "^7.0.2",
     "cz-conventional-changelog": "^3.1.0",
     "eslint": "^6.8.0",

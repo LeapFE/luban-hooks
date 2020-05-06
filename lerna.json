@@ -1,6 +1,6 @@
 {
   "packages": [
-    "packages/@hooks/*"
+    "packages/@luban-hooks/*"
   ],
   "npmClient": "yarn",
   "registry": "https://registry.npmjs.org/",

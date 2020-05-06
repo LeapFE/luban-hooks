@@ -1,6 +1,11 @@
 "use strict";
 
 const shell = require("shelljs");
+const minimist = require("minimist");
+
+const rawArgs = process.argv.slice(2);
+
+const args = minimist(rawArgs);
 
 if (!shell.exec("npm config get registry").stdout.includes("https://registry.npmjs.org/")) {
   console.error("Failed: set npm registry to https://registry.npmjs.org/ first");
@@ -18,9 +23,15 @@ if (updatedRepos.length === 0) {
   process.exit(0);
 }
 
-const { code: buildCode } = shell.exec("yarn run build");
+let buildCommand = "yarn run build";
+
+if (args.package) {
+  buildCommand = `yarn run build --package=${args.package}`;
+}
+
+const { code: buildCode } = shell.exec(buildCommand);
 if (buildCode === 1) {
-  console.error("Failed: yarn run build");
+  console.error(`Failed: ${buildCommand}`);
   process.exit(1);
 }
 
