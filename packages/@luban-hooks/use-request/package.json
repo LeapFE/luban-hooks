@@ -33,9 +33,9 @@
     "check:type": "tsc --noEmit",
     "format": "prettier --write src/**/*.{ts,tsx}",
     "clean": "rimraf es && rimraf lib",
-    "pre:release": "npm run clean && npm run format && npm run eslint",
-    "prepublishOnly": "npm run build",
-    "build": "npm run build:es && npm run build:cjs",
+    "pre:release": "yarn run clean && yarn run format && yarn run eslint",
+    "prepublishOnly": "yarn run build",
+    "build": "yarn run build:es && yarn run build:cjs",
     "build:es": "rimraf es && cross-env NODE_ENV=production tsc --module es2015 --outDir es",
     "build:cjs": "rimraf lib && cross-env NODE_ENV=production tsc --module commonjs --outDir lib"
   },
@@ -51,5 +51,6 @@
     "@types/axios": "^0.14.0",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.4"
-  }
+  },
+  "gitHead": "c04b65e14d25036de3dfadd1170ec21ffcea1f7b"
 }
