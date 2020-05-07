@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.4](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.3...@luban-hooks/use-request@0.0.4) (2020-05-07)
+
+
+### Bug Fixes
+
+* **use-request:** return correct data while options.formatter lack ([8f9e3bd](https://github.com/LeapFE/luban-hooks/commit/8f9e3bdb4080092c30dc17aa1cd2b05ced9569d8))
+
+
+
+
+
 ## [0.0.3](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.2...@luban-hooks/use-request@0.0.3) (2020-05-06)
 
 
