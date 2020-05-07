@@ -51,7 +51,7 @@ export function getFinalOptions(
     };
   }
 
-  return { ...defaultOptions, formatter: (res: any) => res };
+  return { ...defaultOptions, formatter: (res: any) => res.data };
 }
 
 /**

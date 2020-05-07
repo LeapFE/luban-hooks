@@ -34,6 +34,10 @@ type StateRef = {
   response: AxiosResponse<any>;
 };
 
+const validResponseMsg = (serviceName?: string) =>
+  `service ${serviceName ||
+    "unknown"} resolved value is not a valid AxiosResponse, see https://github.com/axios/axios#response-schema`;
+
 const defaultOptions: OptionWithParamsWithoutFormat<AxiosResponse<{}>, undefined> = {
   manual: false,
   onSuccess: () => undefined,
@@ -85,12 +89,7 @@ function useRequest(service: any, options?: any) {
             if (verifyResponseAsAxiosResponse(res)) {
               resolve(res);
             } else {
-              reject(
-                new ResponseError(
-                  `service ${service.name ||
-                    "unknown"} returned value is not a valid AxiosResponse, see https://github.com/axios/axios#response-schema`,
-                ),
-              );
+              reject(new ResponseError(validResponseMsg(service.name)));
             }
           })
           .catch((e: any) => reject(e));
