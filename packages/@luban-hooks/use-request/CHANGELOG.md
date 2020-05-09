@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.6](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.5...@luban-hooks/use-request@0.0.6) (2020-05-09)
+
+
+### Bug Fixes
+
+* **use-request:** unexcepted error when not use global provider ([c586714](https://github.com/LeapFE/luban-hooks/commit/c5867147732a2710c5f33f13923f65f411bdf9cf))
+
+
+
+
+
 ## [0.0.5](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.4...@luban-hooks/use-request@0.0.5) (2020-05-09)
 
 
