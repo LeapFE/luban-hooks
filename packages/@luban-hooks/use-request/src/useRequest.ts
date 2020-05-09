@@ -102,7 +102,7 @@ function useRequest(service: any, options?: any) {
 
   const globalOptions = useContext(globalOptionsContext);
 
-  const { verifyResponse: globalVerifyResponse } = globalOptions;
+  const { verifyResponse: globalVerifyResponse } = globalOptions || {};
 
   const _options = getFinalOptions(defaultOptions, options);
 
