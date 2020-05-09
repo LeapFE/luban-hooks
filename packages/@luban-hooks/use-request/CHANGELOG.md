@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.5](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.4...@luban-hooks/use-request@0.0.5) (2020-05-09)
+
+
+### Bug Fixes
+
+* **use-request:** verify response error ([123461f](https://github.com/LeapFE/luban-hooks/commit/123461fc8bf310b7a6290fcf1d2c21809c0495cf))
+
+
+
+
+
 ## [0.0.4](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.3...@luban-hooks/use-request@0.0.4) (2020-05-07)
 
 
