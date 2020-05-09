@@ -147,7 +147,7 @@ export function verifyResponseAsAxiosResponse(res: unknown): boolean {
     return false;
   }
 
-  if (!res.data || !res.status || !res.statusText) {
+  if (res.data === undefined || typeof res.status !== "number" || res.statusText === undefined) {
     return false;
   }
 
