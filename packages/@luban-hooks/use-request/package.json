@@ -36,8 +36,8 @@
     "pre:release": "yarn run clean && yarn run format && yarn run eslint",
     "prepublishOnly": "yarn run build",
     "build": "yarn run build:es && yarn run build:cjs",
-    "build:es": "rimraf es && cross-env NODE_ENV=production tsc --module es2015 --outDir es",
-    "build:cjs": "rimraf lib && cross-env NODE_ENV=production tsc --module commonjs --outDir lib"
+    "build:es": "rimraf es && cross-env NODE_ENV=production tsc --module es2015 --target ES5 --outDir es",
+    "build:cjs": "rimraf lib && cross-env NODE_ENV=production tsc --module commonjs --target ES5 --outDir lib"
   },
   "bugs": {
     "url": "https://github.com/LeapFE/luban-hooks/issues"
