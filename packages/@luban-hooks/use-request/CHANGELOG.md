@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.7](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.7...@luban-hooks/use-request@0.0.7) (2020-05-15)
+
+**Note:** Version bump only for package @luban-hooks/use-request
+
+
+
+
+
 ## [0.0.7](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.6...@luban-hooks/use-request@0.0.7) (2020-05-15)
 
 
