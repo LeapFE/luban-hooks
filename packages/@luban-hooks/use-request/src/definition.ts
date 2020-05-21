@@ -33,7 +33,7 @@ interface BasicResult<R extends AxiosResponse<any>> {
   reset: () => void;
 
   // invoke service, use last params if service has arguments.
-  refresh: () => void;
+  refresh: () => Promise<void>;
 }
 
 interface BasicResultWithFormat<R extends AxiosResponse<any>, D extends any> {
@@ -57,33 +57,37 @@ interface BasicResultWithFormat<R extends AxiosResponse<any>, D extends any> {
   reset: () => void;
 
   // invoke service, use last params if service has arguments.
-  refresh: () => void;
+  refresh: () => Promise<void>;
 }
 
 // service without params and options without formatter
 export interface ResultWithoutParamsWithoutFormat<R extends AxiosResponse<any>>
   extends BasicResult<R> {
   // manually invoke service, and params will passed if service has arguments.
-  run: () => void;
+  run: () => Promise<void>;
 }
 
 // service without params and options with formatter
 export interface ResultWithoutParamsWithFormat<R extends AxiosResponse<any>, D extends any>
   extends BasicResultWithFormat<R, D> {
   // manually invoke service, and params will passed if service has arguments.
-  run: () => void;
+  run: () => Promise<void>;
 }
 
 // service with params and options without formatter
 export interface ResultWithParamsWithoutFormat<R extends AxiosResponse<any>, P, S>
   extends BasicResult<R> {
-  run: S extends (params: P) => Promise<R> ? (params: P) => void : (params?: P) => void;
+  run: S extends (params: P) => Promise<R>
+    ? (params: P) => Promise<void>
+    : (params?: P) => Promise<void>;
 }
 
 // service with params and options with formatter
 export interface ResultWithParamsWithFormat<R extends AxiosResponse<any>, D extends any, P, S>
   extends BasicResultWithFormat<R, D> {
-  run: S extends (params: P) => Promise<R> ? (params: P) => void : (params?: P) => void;
+  run: S extends (params: P) => Promise<R>
+    ? (params: P) => Promise<void>
+    : (params?: P) => Promise<void>;
 }
 
 interface BasicOptions<R extends AxiosResponse<any>> {

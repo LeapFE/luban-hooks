@@ -174,44 +174,58 @@ function useRequest(service: any, options?: any) {
 
     dispatch({ params: assignedParams });
 
-    let response: AxiosResponse<any> = {} as AxiosResponse<any>;
+    let $response: AxiosResponse<any> = {} as AxiosResponse<any>;
 
-    try {
-      response = await promisifyService(assignedParams);
+    return new Promise((resolve, reject) => {
+      promisifyService(assignedParams)
+        .then((response) => {
+          $response = response;
 
-      dispatch({ response });
+          dispatch({ response });
 
-      if (verifyResponseCb(response)) {
-        const formattedData = formatterCb(response);
+          if (verifyResponseCb(response)) {
+            const formattedData = formatterCb(response);
 
-        dispatch({ data: formattedData });
+            dispatch({ data: formattedData });
 
-        if (isServiceWithParams) {
-          onSuccess(formattedData, assignedParams, response);
-        } else {
-          onSuccess(formattedData, response);
-        }
-      } else {
-        throw Error("response is invalid");
-      }
-    } catch (error) {
-      const enhancedError = error.isAxiosError
-        ? error
-        : enhanceError(error, response.config, response.statusText, response.request, response);
-      dispatch({ error: enhancedError });
+            if (isServiceWithParams) {
+              onSuccess(formattedData, assignedParams, response);
+            } else {
+              onSuccess(formattedData, response);
+            }
 
-      if (error.name === "ResponseError") {
-        console.error(enhancedError);
-      }
+            resolve();
+          } else {
+            reject(Error("response is invalid"));
+          }
+        })
+        .catch((error) => {
+          const enhancedError = error.isAxiosError
+            ? error
+            : enhanceError(
+                error,
+                $response.config,
+                $response.statusText,
+                $response.request,
+                $response,
+              );
 
-      if (isServiceWithParams) {
-        onError(enhancedError, assignedParams);
-      } else {
-        onError(enhancedError);
-      }
-    } finally {
-      dispatch({ fetching: false });
-    }
+          dispatch({ error: enhancedError });
+
+          if (error.name === "ResponseError") {
+            console.error(enhancedError);
+          }
+
+          if (isServiceWithParams) {
+            onError(enhancedError, assignedParams);
+          } else {
+            onError(enhancedError);
+          }
+        })
+        .finally(() => {
+          dispatch({ fetching: false });
+        });
+    });
   }, []);
 
   const reset = useCallback(() => {
@@ -224,15 +238,15 @@ function useRequest(service: any, options?: any) {
   }, []);
 
   const runWithParams = (params?: BasicParams) => {
-    fetch(params);
+    return Promise.resolve(fetch(params));
   };
 
   const runWithoutParams = () => {
-    fetch(undefined);
+    return Promise.resolve(fetch(undefined));
   };
 
   const refresh = () => {
-    fetch(stateRef.current.params);
+    return Promise.resolve(fetch(stateRef.current.params));
   };
 
   useEffect(() => {

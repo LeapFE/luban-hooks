@@ -129,15 +129,49 @@ const {
 
 ### 返回
 
-| 字段     | 说明                                                         | 类型                           |
-| -------- | ------------------------------------------------------------ | ------------------------------ |
-| response | service 函数返回的数据，其格式是符合 [Axios Response Schema](https://github.com/axios/axios#response-schema) 的。 | `AxiosResponse<any> `          |
-| data     | service 函数返回的 `response.data`；如果设置了 `options.formatter`， 该值会被 `formatter` 返回的值覆盖。 | `AxiosResponse["data"] | any`  |
-| error    | service 或 useRequest 执行过程中抛出的异常。                 | `AxiosError<R["data"]> | null` |
-| loading  | service 是否正在执行。                                       | `boolean`                      |
-| run      | 手动触发 service 函数执行，参数将会传递给 service 函数。     | `(params: any) => void`        |
-| reset    | 重置状态，包括 `loading`, `error`, `data`。                  | `() => void`                   |
-| refresh  | 重新执行 service 函数，并使用上一次使用的参数。              | `() => void`                   |
+#### response
+
+*@description:* service 函数返回的数据，其格式是符合 [Axios Response Schema](https://github.com/axios/axios#response-schema) 的。
+
+*@type*: `AxiosResponse<any> `
+
+#### data
+
+*@description:* service 函数返回的 `response.data`；如果设置了 `options.formatter`， 该值会被 `formatter` 返回的值覆盖。
+
+*@type:* `AxiosResponse["data"] | any`
+
+#### error
+
+*@description:* service 执行过程中抛出的异常。
+
+*@type:*`AxiosError<R["data"]> | null`
+
+#### loading
+
+*@description:*service 是否正在执行。
+
+*@type:*`boolean`
+
+#### run
+
+*@description:*手动触发 service 函数执行，参数将会传递给 service 函数。
+
+*@type:*`(params: any) => Promise<void>`
+
+#### reset
+
+*@description:重置状态，包括 `loading`, `error`, `data`。*
+
+*@type:*`() => void`
+
+#### refresh
+
+*@description:*重新执行 service 函数，并使用上一次使用的参数。
+
+*@type:*`() => Promise<void>`
+
+
 
 ### 参数
 
@@ -149,16 +183,77 @@ const {
 
 以下参数都是可选的。
 
-| 字段           | 说明                                    | 类型                                                         | 默认值               |
-| -------------- | --------------------------------------- | ------------------------------------------------------------ | -------------------- |
-| manual         | 是否需要手动触发 service 函数           | `boolean`                                                    | `false`              |
-| defaultLoading | 默认 loading 状态                       | `boolean`                                                    | `false`              |
-| initialData    | 初始的 data                             | `any`                                                        | `{}`                 |
-| defaultParams  | 默认传递给 service 的参数               | `any`                                                        | `undefined`          |
-| onSuccess      | service 执行成功的回调                  | `(data: AxiosResponse["data"], response: AxiosResponse<any>) => void | (data: AxiosResponse["data"], params: any, response: AxiosResponse<any>) => void;` | `() => undefined`    |
-| onError        | service 执行失败的回调                  | `(error: AxiosError<AxiosResponse["data"]>) => void | (error: AxiosError<AxiosResponse["data"]>, params: any) => void;` | `() => undefined`    |
-| verifyResponse | 校验 service 函数返回的数据是否符合预期 | `((response: AxiosResponse<any>) => boolean) `               | `() => true`         |
-| formatter      | 对 service 函数返回的数据进行转换       | `(response: AxiosResponse<any>) => any`                      | `(res) => res.data ` |
+##### manual
+
+*@description:*是否需要手动触发 service 函数
+
+*@type:*`boolean`
+
+*@default:*`false`
+
+##### defaultLoading
+
+*@description:默认 loading 状态*
+
+*@type*:`boolean`
+
+*@default:*`false`
+
+##### initialData
+
+*@description:*初始的 data
+
+*@type:*`any`
+
+*@default:*`{}`
+
+##### defaultParams
+
+*@description:*默认传递给 service 的参数
+
+*@type:*`any`
+
+*@default:*`undefined`
+
+##### onSuccess
+
+*@description:*service 执行成功的回调
+
+*@type:*`(data: AxiosResponse["data"], response: AxiosResponse<any>) => void | (data: AxiosResponse["data"], params: any, response: AxiosResponse<any>) => void;`
+
+*@default:`() => undefined`*
+
+##### onError
+
+*@description:*service 执行失败的回调
+
+*@type:*`(error: AxiosError<AxiosResponse["data"]>) => void | (error: AxiosError<AxiosResponse["data"]>, params: any) => void;`
+
+*@default:`() => undefined`*
+
+##### verifyResponse
+
+*@description:*校验 service 函数返回的数据是否符合预期
+
+*@type:*`((response: AxiosResponse<any>) => boolean) `
+
+*@default:*`() => true`
+
+##### formatter
+
+*@description:*对 service 函数返回的数据进行转换
+
+*@type:*`(response: AxiosResponse<any>) => any`
+
+*@default:*`(res) => res.data `
+
+> 当使用此配置进行数据转换时，需要显式的指定形参 `res` 的类型，以确保可以正确的推导出 `data` 的类型， 例如：
+>
+> ```ts
+> const { data, loading, error, run } = useRequest(getTopicList, {
+>   formatter: (res: AxiosResponse<Response<Topic[]>>) => res.data.data,
+> });
+> ```
 
 ### 全局配置
 
