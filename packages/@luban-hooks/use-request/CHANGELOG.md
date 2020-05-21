@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.8](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.7...@luban-hooks/use-request@0.0.8) (2020-05-21)
+
+
+### Features
+
+* **use-request:** promisify for `run` and `refresh` ([5211a36](https://github.com/LeapFE/luban-hooks/commit/5211a3678346b66a7481e2173edfdd00a8f9a792))
+
+
+
+
+
 ## [0.0.7](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@0.0.6...@luban-hooks/use-request@0.0.7) (2020-05-15)
 
 
