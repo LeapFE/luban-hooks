@@ -1,6 +1,6 @@
 {
   "name": "@luban-hooks/use-request",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "description": "React Hooks for fetching data, based on axios",
   "keywords": [
     "hooks",
