@@ -1,9 +1,5 @@
 import { AxiosResponse, AxiosRequestConfig, AxiosError } from "axios";
-import {
-  BasicParams,
-  OptionWithParamsWithoutFormat,
-  AdvancedOptionsWithParams,
-} from "./definition";
+import { BasicParams, OptionWithParams } from "./definition";
 
 export function isObject(value: unknown): value is Record<string, any> {
   return Object.prototype.toString.call(value) === "[object Object]";
@@ -14,7 +10,7 @@ export function isArray(value: unknown): value is Array<any> {
 }
 
 export function isFunction(value: unknown): value is Function {
-  return Object.prototype.toString.call(value) === "[object Function]";
+  return typeof value === "function";
 }
 
 export function assignParams(params: unknown, defaultParams: unknown): BasicParams {
@@ -35,23 +31,34 @@ export function assignParams(params: unknown, defaultParams: unknown): BasicPara
 }
 
 export function getFinalOptions(
-  defaultOptions: OptionWithParamsWithoutFormat<AxiosResponse<{}>, undefined>,
   options?: unknown,
-): Record<keyof AdvancedOptionsWithParams<AxiosResponse<{}>, any, any, any>, any> {
+): Record<keyof OptionWithParams<AxiosResponse<{}>, any, any>, any> {
+  const defaultOptions = {
+    manual: false,
+    defaultLoading: null,
+    defaultParams: undefined,
+    initialData: {},
+    formatter: (res: any) => res.data,
+  };
   if (isObject(options)) {
     return {
       manual: options.manual || defaultOptions.manual,
-      onSuccess: options.onSuccess || defaultOptions.onSuccess,
-      onError: options.onError || defaultOptions.onError,
+      onSuccess: options.onSuccess,
+      onError: options.onError,
       defaultLoading: options.defaultLoading || defaultOptions.defaultLoading,
-      defaultParams: options.defaultParams || defaultOptions.defaultParams,
-      initialData: options.initialData || defaultOptions.initialData,
-      verifyResponse: options.verifyResponse || defaultOptions.verifyResponse,
-      formatter: options.formatter || ((res: any) => res.data),
+      defaultParams: options.defaultParams || defaultOptions.initialData,
+      initialData: options.initialData || {},
+      verifyResponse: options.verifyResponse,
+      formatter: options.formatter || defaultOptions.formatter,
     };
   }
 
-  return { ...defaultOptions, formatter: (res: any) => res.data };
+  return {
+    ...defaultOptions,
+    onError: undefined,
+    onSuccess: undefined,
+    verifyResponse: undefined,
+  };
 }
 
 /**

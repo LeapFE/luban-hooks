@@ -1,7 +1,5 @@
 import { AxiosResponse, AxiosError } from "axios";
 
-// export type Canceler = (message?: string) => void;
-
 export type BasicParams = object | Array<any> | number | string | boolean | undefined;
 
 export type Fetching = null | boolean;
@@ -11,32 +9,8 @@ export type Service<R extends AxiosResponse<any>, P> = (params: P) => Promise<R>
 // service function without params
 export type ServiceWithoutParams<R extends AxiosResponse<any>> = () => Promise<R>;
 
-// result without format
-interface BasicResult<R extends AxiosResponse<any>> {
-  // is executing service(Promise that service returned whether or not resolved/rejected)
-  loading: boolean;
-
-  // data of service returned, default {}.
-  // if give formatter, it will override by formatter returned value
-  data: R["data"];
-
-  // axios response schema. see https://github.com/axios/axios#response-schema
-  response: R;
-
-  // cancel request
-  // cancel: Canceler;
-
-  // exception that while invoke service
-  error: AxiosError<R["data"]> | null;
-
-  // reset all status, set loading(false), set error(null), set data({})
-  reset: () => void;
-
-  // invoke service, use last params if service has arguments.
-  refresh: () => Promise<void>;
-}
-
-interface BasicResultWithFormat<R extends AxiosResponse<any>, D extends any> {
+// result with format
+interface BasicResult<R extends AxiosResponse<any>, D extends any> {
   // is executing service(Promise that service returned whether or not resolved/rejected)
   loading: boolean;
 
@@ -46,9 +20,6 @@ interface BasicResultWithFormat<R extends AxiosResponse<any>, D extends any> {
 
   // axios response schema. see https://github.com/axios/axios#response-schema
   response: R;
-
-  // cancel request
-  // cancel: Canceler;
 
   // exception that while invoke service
   error: AxiosError<D> | null;
@@ -60,37 +31,22 @@ interface BasicResultWithFormat<R extends AxiosResponse<any>, D extends any> {
   refresh: () => Promise<void>;
 }
 
-// service without params and options without formatter
-export interface ResultWithoutParamsWithoutFormat<R extends AxiosResponse<any>>
-  extends BasicResult<R> {
+// service without params
+export interface ResultWithoutParams<R extends AxiosResponse<any>, D extends any>
+  extends BasicResult<R, D> {
   // manually invoke service, and params will passed if service has arguments.
   run: () => Promise<void>;
 }
 
-// service without params and options with formatter
-export interface ResultWithoutParamsWithFormat<R extends AxiosResponse<any>, D extends any>
-  extends BasicResultWithFormat<R, D> {
-  // manually invoke service, and params will passed if service has arguments.
-  run: () => Promise<void>;
-}
-
-// service with params and options without formatter
-export interface ResultWithParamsWithoutFormat<R extends AxiosResponse<any>, P, S>
-  extends BasicResult<R> {
+// service with params
+export interface ResultWithParams<R extends AxiosResponse<any>, P, D extends any, S>
+  extends BasicResult<R, D> {
   run: S extends (params: P) => Promise<R>
     ? (params: P) => Promise<void>
     : (params?: P) => Promise<void>;
 }
 
-// service with params and options with formatter
-export interface ResultWithParamsWithFormat<R extends AxiosResponse<any>, D extends any, P, S>
-  extends BasicResultWithFormat<R, D> {
-  run: S extends (params: P) => Promise<R>
-    ? (params: P) => Promise<void>
-    : (params?: P) => Promise<void>;
-}
-
-interface BasicOptions<R extends AxiosResponse<any>> {
+interface BasicOptions<R extends AxiosResponse<any>, D = any> {
   // is manually invoke service
   manual: boolean;
 
@@ -102,31 +58,12 @@ interface BasicOptions<R extends AxiosResponse<any>> {
 
   // verify response as excepted
   verifyResponse: ((response: R) => boolean) | undefined;
-}
 
-// service without params and options without formatter
-export interface OptionWithoutParamsWithoutFormat<R extends AxiosResponse<any>>
-  extends BasicOptions<R> {
-  // callback after `verifyResponse` return true
-  onSuccess: (data: R["data"], response: AxiosResponse<R>) => void;
-  // callback during invoke service
-  onError: (error: AxiosError<R["data"]>) => void;
-}
-
-// service with params and options without formatter
-export interface OptionWithParamsWithoutFormat<R extends AxiosResponse<any>, P>
-  extends BasicOptions<R> {
-  // callback after `verifyResponse` return true
-  onSuccess: (data: R["data"], params: P, response: AxiosResponse<R>) => void;
-  // callback during invoke service
-  onError: (error: AxiosError<R["data"]>, params: P) => void;
-  // default params
-  defaultParams: P;
+  formatter: ((response: R) => D) | undefined;
 }
 
 // service with params and options with formatter
-export interface OptionWithParamsWithFormat<R extends AxiosResponse<any>, D, P>
-  extends BasicOptions<R> {
+export interface OptionWithParams<R extends AxiosResponse<any>, P, D> extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
   onSuccess: (data: D, params: P, response: AxiosResponse<R>) => void;
   // callback during invoke service
@@ -136,26 +73,32 @@ export interface OptionWithParamsWithFormat<R extends AxiosResponse<any>, D, P>
 }
 
 // service without params and options with formatter
-export interface OptionWithoutParamsAndWithFormat<R extends AxiosResponse<any>, D>
-  extends BasicOptions<R> {
+export interface OptionWithoutParams<R extends AxiosResponse<any>, D> extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
   onSuccess: (data: D, response: AxiosResponse<R>) => void;
   // callback during invoke service
   onError: (error: AxiosError<R["data"]>) => void;
 }
 
-export interface AdvancedOptionsWithParams<R extends AxiosResponse<any>, P, E, T extends E>
-  extends Partial<OptionWithParamsWithFormat<R, T, P>> {
-  formatter: (response: R) => E;
-}
+/**
+ * @description Global Options(not include `formatter` param)
+ */
+export type BasicGlobalOptions<R extends AxiosResponse<any>> = {
+  // is manually invoke service; if specified local `manual`, ignored.
+  manual?: boolean;
 
-export interface AdvancedOptionsWithoutParams<R extends AxiosResponse<any>, E, T extends E>
-  extends Partial<OptionWithoutParamsAndWithFormat<R, T>> {
-  formatter: (response: R) => E;
-}
+  // global default loading status; if specified local `defaultLoading`, ignored.
+  defaultLoading?: boolean | null;
 
-// Global Options
-export type BasicGlobalOptions<R> = {
-  // verify `response` as expected. if specify it in `useRequest`, it will be override.
+  // global init data; if specified local `initialData`, ignored.
+  initialData?: unknown;
+
+  // verify `response` as expected. if specified local `verifyResponse`, it will be ignored.
   verifyResponse?: (response: R) => boolean;
+
+  // callback after `verifyResponse` return true; if specified local `onSuccess`, ignored.
+  onSuccess?: (response: AxiosResponse<R>) => void;
+
+  // callback during invoke service; if specified local `onError`, ignored.
+  onError?: (error: AxiosError<R["data"]>) => void;
 };

@@ -2,21 +2,6 @@
 import { useState, useEffect, useCallback, useContext, useMemo, useRef } from "react";
 import { AxiosResponse, AxiosError } from "axios";
 
-import {
-  Fetching,
-  BasicParams,
-  Service,
-  ServiceWithoutParams,
-  ResultWithParamsWithFormat,
-  ResultWithParamsWithoutFormat,
-  ResultWithoutParamsWithFormat,
-  ResultWithoutParamsWithoutFormat,
-  OptionWithParamsWithoutFormat,
-  OptionWithoutParamsWithoutFormat,
-  AdvancedOptionsWithParams,
-  AdvancedOptionsWithoutParams,
-} from "./definition";
-
 import { globalOptionsContext } from "./provider";
 import {
   getFinalOptions,
@@ -24,7 +9,19 @@ import {
   enhanceError,
   verifyResponseAsAxiosResponse,
   ResponseError,
+  isFunction,
 } from "./share";
+
+import {
+  OptionWithParams,
+  OptionWithoutParams,
+  BasicParams,
+  Fetching,
+  Service,
+  ServiceWithoutParams,
+  ResultWithParams,
+  ResultWithoutParams,
+} from "./definition";
 
 type StateRef = {
   fetching: Fetching;
@@ -38,42 +35,27 @@ const validResponseMsg = (serviceName?: string) =>
   `service ${serviceName ||
     "unknown"} resolved value is not a valid AxiosResponse, see https://github.com/axios/axios#response-schema`;
 
-const defaultOptions: OptionWithParamsWithoutFormat<AxiosResponse<{}>, undefined> = {
-  manual: false,
-  onSuccess: () => undefined,
-  onError: () => undefined,
-  defaultLoading: null,
-  defaultParams: undefined,
-  initialData: {},
-  verifyResponse: undefined,
-};
-
-// service without params and options without formatter
-function useRequest<R extends AxiosResponse<any>>(
-  service: ServiceWithoutParams<R>,
-  options?: Partial<OptionWithoutParamsWithoutFormat<R>>,
-): ResultWithoutParamsWithoutFormat<R>;
-
-// service with params and options without formatter
-function useRequest<R extends AxiosResponse<any>, P extends BasicParams>(
-  service: Service<R, P>,
-  options?: Partial<OptionWithParamsWithoutFormat<R, P>>,
-): ResultWithParamsWithoutFormat<R, P, Service<R, P>>;
-
 // service without params and options has formatter
-function useRequest<R extends AxiosResponse<any>, D, T extends D>(
+function useRequest<
+  R extends AxiosResponse<any>,
+  D = OptionWithoutParams<R, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
+>(
   service: ServiceWithoutParams<R>,
-  options?: AdvancedOptionsWithoutParams<R, D, T>,
-): ResultWithoutParamsWithFormat<R, D>;
+  options?: Partial<OptionWithoutParams<R, D>>,
+): ResultWithoutParams<R, D>;
 
 // service with params and options with formatter
-function useRequest<R extends AxiosResponse<any>, P extends BasicParams, D, T extends D>(
+function useRequest<
+  R extends AxiosResponse<any>,
+  P extends BasicParams,
+  D = OptionWithoutParams<R, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
+>(
   service: Service<R, P>,
-  options?: AdvancedOptionsWithParams<R, P, D, T>,
-): ResultWithParamsWithFormat<R, D, P, Service<R, P>>;
+  options?: Partial<OptionWithParams<R, P, D>>,
+): ResultWithParams<R, P, D, Service<R, P>>;
 
 function useRequest(service: any, options?: any) {
-  if (typeof service !== "function") {
+  if (!isFunction(service)) {
     throw Error(`service ${service} is not a function`);
   }
 
@@ -83,7 +65,7 @@ function useRequest(service: any, options?: any) {
     return new Promise<AxiosResponse<any>>((resolve, reject) => {
       const result = service(args);
 
-      if (typeof result.then === "function") {
+      if (isFunction(result.then)) {
         result
           .then((res: any) => {
             if (verifyResponseAsAxiosResponse(res)) {
@@ -102,9 +84,21 @@ function useRequest(service: any, options?: any) {
 
   const globalOptions = useContext(globalOptionsContext);
 
-  const { verifyResponse: globalVerifyResponse } = globalOptions || {};
+  const {
+    verifyResponse: globalVerifyResponse,
+    onSuccess: globalOnSuccess,
+    onError: globalOnError,
+    manual: globalManual,
+    initialData: globalInitialData,
+    defaultLoading: globalDefaultLoading,
+  } = globalOptions || {};
 
-  const _options = getFinalOptions(defaultOptions, options);
+  const localOptions = getFinalOptions({
+    manual: globalManual,
+    initialData: globalInitialData,
+    defaultLoading: globalDefaultLoading,
+    ...options,
+  });
 
   const {
     manual,
@@ -115,7 +109,7 @@ function useRequest(service: any, options?: any) {
     initialData,
     formatter,
     verifyResponse,
-  } = _options;
+  } = localOptions;
 
   const stateDependenciesRef = useRef({
     fetching: false,
@@ -148,23 +142,15 @@ function useRequest(service: any, options?: any) {
   }, []);
 
   const verifyResponseCb = useMemo(() => {
-    if (typeof verifyResponse === "function") {
+    if (isFunction(verifyResponse)) {
       return verifyResponse;
     }
 
-    if (typeof globalVerifyResponse === "function") {
+    if (isFunction(globalVerifyResponse)) {
       return globalVerifyResponse;
     }
 
     return () => true;
-  }, []);
-
-  const formatterCb = useMemo(() => {
-    if (typeof formatter === "function") {
-      return formatter;
-    }
-
-    return (res: AxiosResponse<any>) => res.data;
   }, []);
 
   const fetch = useCallback(async (params: BasicParams) => {
@@ -184,14 +170,18 @@ function useRequest(service: any, options?: any) {
           dispatch({ response });
 
           if (verifyResponseCb(response)) {
-            const formattedData = formatterCb(response);
+            const formattedData = formatter(response);
 
             dispatch({ data: formattedData });
 
-            if (isServiceWithParams) {
-              onSuccess(formattedData, assignedParams, response);
-            } else {
-              onSuccess(formattedData, response);
+            if (isFunction(onSuccess)) {
+              if (isServiceWithParams) {
+                onSuccess(formattedData, assignedParams, response);
+              } else {
+                onSuccess(formattedData, response);
+              }
+            } else if (isFunction(globalOnSuccess) && !isFunction(onSuccess)) {
+              globalOnSuccess(response);
             }
 
             resolve();
@@ -216,10 +206,14 @@ function useRequest(service: any, options?: any) {
             console.error(enhancedError);
           }
 
-          if (isServiceWithParams) {
-            onError(enhancedError, assignedParams);
-          } else {
-            onError(enhancedError);
+          if (isFunction(onError)) {
+            if (isServiceWithParams) {
+              onError(enhancedError, assignedParams);
+            } else {
+              onError(enhancedError);
+            }
+          } else if (isFunction(globalOnError) && !isFunction(onError)) {
+            globalOnError(enhancedError);
           }
         })
         .finally(() => {

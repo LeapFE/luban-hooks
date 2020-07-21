@@ -1,20 +1,19 @@
 import { createContext, Context } from "react";
-import { BasicGlobalOptions } from "./definition";
+import { AxiosResponse } from "axios";
 
-function generateGlobalOptionContext<R>(
+import { BasicGlobalOptions } from "./definition";
+import { isObject } from "./share";
+
+function generateGlobalOptionContext<R extends AxiosResponse<any>>(
   value: BasicGlobalOptions<R>,
 ): {
   context: Context<BasicGlobalOptions<R>>;
   initContext: BasicGlobalOptions<R>;
 } {
-  const initContext = Object.create({});
+  let initContext = Object.create({});
 
-  // const initContext = Object.create({ ...value });
-
-  if (value) {
-    if (typeof value.verifyResponse === "function") {
-      initContext.verifyResponse = value.verifyResponse;
-    }
+  if (isObject(value)) {
+    initContext = value;
   }
 
   const context = createContext(initContext);

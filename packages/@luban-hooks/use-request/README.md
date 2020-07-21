@@ -21,22 +21,28 @@ import React, { FunctionComponent } from "react";
 import axios from "axios";
 import { useRequest } from "@luban-hooks/use-request";
 
-type Response<T> = {
-  success: boolean;
+interface ResponseData<T> {
+  code: number;
+  msg?: string;
   data: T;
+}
+
+type UserItem = {
+  id: number;
+  name: string;
 };
 
-type Topic = {
-  id: string;
-  title: string;
-};
-
-function getTopicList() {
-  return axios.get<Response<Topic[]>>("https://cnodejs.org/api/v1/topics?limit=10");
+function getUserList(params: getUserListQuery) {
+  const url = params.name ? `/users?name=${params.name}` : "/users";
+  return request.get<ResponseData<UserItem[]>>(url);
 }
 
 const User: FunctionComponent = () => {
-  const { data, loading, error } = useRequest(getTopicList);
+  const { data: userList, loading, error } = useRequest(getUserList, {
+    initialData: [],
+    defaultParams: {},
+    formatter: (res) => res.data.data,
+  });
 
   if (error) {
     return <div>something wrong</div>;
@@ -48,8 +54,8 @@ const User: FunctionComponent = () => {
 
   return (
     <ul>
-      {Array.isArray(data.data) && data.data.map((topic) => {
-        return <li key={topic.id}>{topic.title}</li>;
+      {userList.map((user) => {
+        return <li key={user.id}>{user.name}</li>;
       })}
     </ul>
   );
@@ -65,42 +71,34 @@ import React, { FunctionComponent } from "react";
 import axios from "axios";
 import { useRequest } from "@luban-hooks/use-request";
 
-type Response<T> = {
-  success: boolean;
+interface ResponseData<T> {
+  code: number;
+  msg?: string;
   data: T;
-};
+}
 
-type Topic = {
-  id: string;
-  title: string;
-};
-
-function getTopicList() {
-  return axios.get<Response<Topic[]>>("https://cnodejs.org/api/v1/topics?limit=10");
+function addUser(params: { name: string }) {
+  return request.post<ResponseData<boolean>>(`/user/${params.name}`);
 }
 
 const User: FunctionComponent = () => {
-  const { data, loading, error, run } = useRequest(getTopicList, {
+   const { run: putAddUser } = useRequest(addUser, {
     manual: true,
+    onSuccess: (res) => {
+      if (res.code === 1) {
+        // TODO do something
+      }
+    },
   });
 
-  if (error) {
-    return <div>something wrong</div>;
-  }
-
-  if (loading) {
-    return <div>loading...</div>;
-  }
 
   return (
-    <>
-      <ul>
-        {Array.isArray(data.data) && data.data.map((topic) => {
-          return <li key={topic.id}>{topic.title}</li>;
-        })}
-      </ul>
-      <button type="button" onClick={() => run()}>send</button>
-    </>
+    <ul>
+      {/* TODO display user list */}
+      <button type="button" onClick={() => putAddUser({ name: "brendan" })}>
+        Add
+      </button>
+    </ul>
   );
 };
 ```
@@ -149,25 +147,25 @@ const {
 
 #### loading
 
-*@description:*service 是否正在执行。
+*@description:* service 是否正在执行。
 
 *@type:*`boolean`
 
 #### run
 
-*@description:*手动触发 service 函数执行，参数将会传递给 service 函数。
+*@description:* 手动触发 service 函数执行，参数将会传递给 service 函数。
 
 *@type:*`(params: any) => Promise<void>`
 
 #### reset
 
-*@description:重置状态，包括 `loading`, `error`, `data`。*
+*@description:* 重置状态，包括 `loading`, `error`, `data`。
 
 *@type:*`() => void`
 
 #### refresh
 
-*@description:*重新执行 service 函数，并使用上一次使用的参数。
+*@description:* 重新执行 service 函数，并使用上一次使用的参数。
 
 *@type:*`() => Promise<void>`
 
@@ -185,7 +183,7 @@ const {
 
 ##### manual
 
-*@description:*是否需要手动触发 service 函数
+*@description:* 是否需要手动触发 service 函数
 
 *@type:*`boolean`
 
@@ -193,7 +191,7 @@ const {
 
 ##### defaultLoading
 
-*@description:默认 loading 状态*
+*@description:* 默认 loading 状态
 
 *@type*:`boolean`
 
@@ -201,7 +199,7 @@ const {
 
 ##### initialData
 
-*@description:*初始的 data
+*@description:* 初始的 data
 
 *@type:*`any`
 
@@ -209,7 +207,7 @@ const {
 
 ##### defaultParams
 
-*@description:*默认传递给 service 的参数
+*@description:* 默认传递给 service 的参数
 
 *@type:*`any`
 
@@ -217,23 +215,23 @@ const {
 
 ##### onSuccess
 
-*@description:*service 执行成功的回调
+*@description:* service 执行成功的回调
 
 *@type:*`(data: AxiosResponse["data"], response: AxiosResponse<any>) => void | (data: AxiosResponse["data"], params: any, response: AxiosResponse<any>) => void;`
 
-*@default:`() => undefined`*
+*@default:*`() => undefined`
 
 ##### onError
 
-*@description:*service 执行失败的回调
+*@description:* service 执行失败的回调
 
 *@type:*`(error: AxiosError<AxiosResponse["data"]>) => void | (error: AxiosError<AxiosResponse["data"]>, params: any) => void;`
 
-*@default:`() => undefined`*
+*@default:*`() => undefined`
 
 ##### verifyResponse
 
-*@description:*校验 service 函数返回的数据是否符合预期
+*@description:* 校验 service 函数返回的数据是否符合预期
 
 *@type:*`((response: AxiosResponse<any>) => boolean) `
 
@@ -241,19 +239,12 @@ const {
 
 ##### formatter
 
-*@description:*对 service 函数返回的数据进行转换
+*@description:* 对 service 函数返回的数据进行转换
 
 *@type:*`(response: AxiosResponse<any>) => any`
 
 *@default:*`(res) => res.data `
 
-> 当使用此配置进行数据转换时，需要显式的指定形参 `res` 的类型，以确保可以正确的推导出 `data` 的类型， 例如：
->
-> ```ts
-> const { data, loading, error, run } = useRequest(getTopicList, {
->   formatter: (res: AxiosResponse<Response<Topic[]>>) => res.data.data,
-> });
-> ```
 
 ### 全局配置
 
@@ -262,17 +253,25 @@ const {
 ``` tsx
 import { UseRequestProvider } from "@luban-hooks/use-request";
 
-type Response<T> = {
-  success: boolean;
+interface ResponseData<T> {
+  code: number;
+  msg?: string;
   data: T;
-};
+}
 
-<UseRequestProvider<AxiosResponse<Response<any>> value={{
-  verifyResponse: (res) => res.status === 200 && res.data.success,
-}}>
+<UseRequestProvider<AxiosResponse<ResponseData<any>>
+  value={{
+    verifyResponse: (res) => res.status === 200 && res.data.code === 1,
+    onSuccess: () => console.log("global success"),
+    onError: (error) => console.log(error, "global error"),
+    manual: false,
+    defaultLoading: true,
+    initialData: [],
+  }}
+>
   <App />
 </UseRequestProvider>
 ```
 
-`UseRequestProvider` 目前只接受一个参数，即 `verifyResponse`, 具体使用和 `useRequest` 的 `options.verifyResponse` 相同。
+**`UseRequestProvider` 并不支持全局的 `formatter` 参数**。
 
