@@ -13,13 +13,15 @@
     "check:type": "node scripts/build.js --check",
     "build:changed": "node scripts/build.js --onlyChanged",
     "build": "node scripts/build.js",
-    "publish": "node scripts/publish.js",
+    "publish:beta": "node scripts/publish.js --tag=beta",
+    "publish:latest": "node scripts/publish.js --tag=latest",
     "test:changed": "node scripts/test.js --onlyChanged",
     "test": "node scripts/test.js",
     "jest-coverage": "yarn jest --coverage --color -i .*@hooks/.*/.*\\.test\\.ts$",
     "commit": "yarn run test:changed && yarn run format:packages && git-cz",
     "bootstrap": "lerna bootstrap",
-    "clean": "lerna clean"
+    "clean": "lerna clean",
+    "clear": "rimraf packages/**/dist/"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
