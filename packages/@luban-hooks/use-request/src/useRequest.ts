@@ -35,7 +35,7 @@ const validResponseMsg = (serviceName?: string) =>
   `service ${serviceName ||
     "unknown"} resolved value is not a valid AxiosResponse, see https://github.com/axios/axios#response-schema`;
 
-// service without params and options has formatter
+// service without params
 function useRequest<
   R extends AxiosResponse<any>,
   D = OptionWithoutParams<R, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
@@ -44,11 +44,11 @@ function useRequest<
   options?: Partial<OptionWithoutParams<R, D>>,
 ): ResultWithoutParams<R, D>;
 
-// service with params and options with formatter
+// service with params
 function useRequest<
   R extends AxiosResponse<any>,
   P extends BasicParams,
-  D = OptionWithoutParams<R, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
+  D = OptionWithParams<R, P, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
 >(
   service: Service<R, P>,
   options?: Partial<OptionWithParams<R, P, D>>,

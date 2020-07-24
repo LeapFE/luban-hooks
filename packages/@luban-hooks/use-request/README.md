@@ -245,6 +245,22 @@ const {
 
 *@default:*`(res) => res.data `
 
+##### 同时存在 `formatter` 和 `onSuccess` 参数：
+
+当 `formatter` 和 `onSuccess` 参数同时存在时，使用 `onSuccess` 的第一个参数时，需要显式的标明其类型：
+
+```tsx
+ const { data: userList, run: fetchUserList } = useRequest(getUserList, {
+   initialData: [],
+   defaultParams: {},
+   formatter: (res) => res.data.data,
+   // 需要使用 `formatter` 返回的值类型来标明 `onSuccess` 第一个参数的类型，确保 `userList` 的类型被正确的推导
+   onSuccess: (data: UserItem[], params, res) => {
+     console.log(data, params, res);
+   },
+ });
+```
+
 
 ### 全局配置
 
@@ -273,5 +289,5 @@ interface ResponseData<T> {
 </UseRequestProvider>
 ```
 
-**`UseRequestProvider` 并不支持全局的 `formatter` 参数**。
+**`UseRequestProvider` 并不支持全局的 `formatter` 和 `defaultParams` 参数**。
 

@@ -1,11 +1,19 @@
 import { AxiosResponse, AxiosError } from "axios";
 
-export type BasicParams = object | Array<any> | number | string | boolean | undefined;
+export type BasicParams =
+  | Array<any>
+  | number
+  | string
+  | boolean
+  | undefined
+  | Record<PropertyKey, any>;
 
 export type Fetching = null | boolean;
 
 // service function with params
-export type Service<R extends AxiosResponse<any>, P> = (params: P) => Promise<R>;
+export type Service<R extends AxiosResponse<any>, P extends BasicParams> = (
+  params: P,
+) => Promise<R>;
 // service function without params
 export type ServiceWithoutParams<R extends AxiosResponse<any>> = () => Promise<R>;
 
@@ -46,7 +54,7 @@ export interface ResultWithParams<R extends AxiosResponse<any>, P, D extends any
     : (params?: P) => Promise<void>;
 }
 
-interface BasicOptions<R extends AxiosResponse<any>, D = any> {
+interface BasicOptions<R extends AxiosResponse<any>, D> {
   // is manually invoke service
   manual: boolean;
 
@@ -57,15 +65,15 @@ interface BasicOptions<R extends AxiosResponse<any>, D = any> {
   initialData: unknown;
 
   // verify response as excepted
-  verifyResponse: ((response: R) => boolean) | undefined;
+  verifyResponse: (response: R) => boolean;
 
-  formatter: ((response: R) => D) | undefined;
+  formatter: (response: R) => D;
 }
 
 // service with params and options with formatter
 export interface OptionWithParams<R extends AxiosResponse<any>, P, D> extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
-  onSuccess: (data: D, params: P, response: AxiosResponse<R>) => void;
+  onSuccess: (data: D, params: P, response: R) => void;
   // callback during invoke service
   onError: (error: AxiosError<R["data"]>, params: P) => void;
   // default params
@@ -75,7 +83,7 @@ export interface OptionWithParams<R extends AxiosResponse<any>, P, D> extends Ba
 // service without params and options with formatter
 export interface OptionWithoutParams<R extends AxiosResponse<any>, D> extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
-  onSuccess: (data: D, response: AxiosResponse<R>) => void;
+  onSuccess: (data: D, response: R) => void;
   // callback during invoke service
   onError: (error: AxiosError<R["data"]>) => void;
 }
@@ -97,7 +105,7 @@ export type BasicGlobalOptions<R extends AxiosResponse<any>> = {
   verifyResponse?: (response: R) => boolean;
 
   // callback after `verifyResponse` return true; if specified local `onSuccess`, ignored.
-  onSuccess?: (response: AxiosResponse<R>) => void;
+  onSuccess?: (response: R) => void;
 
   // callback during invoke service; if specified local `onError`, ignored.
   onError?: (error: AxiosError<R["data"]>) => void;
