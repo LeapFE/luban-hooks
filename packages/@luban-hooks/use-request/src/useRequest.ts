@@ -38,7 +38,7 @@ const validResponseMsg = (serviceName?: string) =>
 // service without params
 function useRequest<
   R extends AxiosResponse<any>,
-  D = OptionWithoutParams<R, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
+  D = OptionWithoutParams<R, R>["formatter"] extends (res: R) => infer U ? U : R["data"]
 >(
   service: ServiceWithoutParams<R>,
   options?: Partial<OptionWithoutParams<R, D>>,
@@ -48,7 +48,7 @@ function useRequest<
 function useRequest<
   R extends AxiosResponse<any>,
   P extends BasicParams,
-  D = OptionWithParams<R, P, any>["formatter"] extends (res: R) => infer U ? U : R["data"]
+  D = OptionWithParams<R, P, R>["formatter"] extends (res: R) => infer U ? U : R["data"]
 >(
   service: Service<R, P>,
   options?: Partial<OptionWithParams<R, P, D>>,
