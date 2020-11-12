@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.3-beta.0](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.2...@luban-hooks/use-request@1.1.3-beta.0) (2020-11-12)
+
+
+### Bug Fixes
+
+* **use-request:** throw error while failed validation response ([b0db7ff](https://github.com/LeapFE/luban-hooks/commit/b0db7ff6e4e903b6f574a9248e71d50b3ba34a0a))
+
+
+
+
+
 ## [1.1.2](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.1...@luban-hooks/use-request@1.1.2) (2020-08-11)
 
 
