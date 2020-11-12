@@ -6,14 +6,14 @@ import { generateGlobalOptionContext } from "./context";
 
 let globalOptionsContext: Context<BasicGlobalOptions<any>> = {} as Context<BasicGlobalOptions<any>>;
 
-type UseRequestProviderProps<R extends AxiosResponse<any>> = {
+type UseRequestProviderProps<R extends AxiosResponse<unknown>> = {
   value: BasicGlobalOptions<R>;
   children: ReactNode;
 };
 
-function UseRequestProvider<R extends AxiosResponse<any>>(
+function UseRequestProvider<R extends AxiosResponse<unknown>>(
   props: UseRequestProviderProps<R>,
-): ReactElement<any, any> {
+): ReactElement<unknown, string> {
   const { context: GlobalOptionsContext, initContext } = generateGlobalOptionContext(props.value);
 
   globalOptionsContext = GlobalOptionsContext;

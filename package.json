@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "eslint:packages": "eslint -c packages/.eslintrc packages/**/*.{ts,tsx}",
+    "eslint:packages:strict": "eslint --report-unused-disable-directives --no-inline-config -c packages/.eslintrc packages/**/*.{ts,tsx}",
     "eslint:scripts": "eslint -c scripts/.eslintrc scripts/*.js",
     "format:packages": "prettier --write packages/**/*.{ts,tsx}",
     "format:scripts": "prettier --write scripts/*.js",
@@ -18,7 +19,7 @@
     "test:changed": "node scripts/test.js --onlyChanged",
     "test": "node scripts/test.js",
     "jest-coverage": "yarn jest --coverage --color -i .*@hooks/.*/.*\\.test\\.ts$",
-    "commit": "yarn run test:changed && yarn run format:packages && git-cz",
+    "commit": "lint-staged && git-cz",
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean",
     "clear": "rimraf packages/**/dist/"
@@ -54,11 +55,11 @@
   "author": "front-end-captain <18810940932@163.com>",
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "lint-staged": {
+    "*": "yarn run test:changed",
     "packages/**/*.ts": [
       "yarn run format:packages",
       "yarn run eslint:packages"

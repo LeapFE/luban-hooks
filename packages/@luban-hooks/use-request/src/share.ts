@@ -1,11 +1,11 @@
 import { AxiosResponse, AxiosRequestConfig, AxiosError } from "axios";
 import { BasicParams, OptionWithParams } from "./definition";
 
-export function isObject(value: unknown): value is Record<string, any> {
+export function isObject(value: unknown): value is Record<string, unknown> {
   return Object.prototype.toString.call(value) === "[object Object]";
 }
 
-export function isArray(value: unknown): value is Array<any> {
+export function isArray(value: unknown): value is Array<unknown> {
   return Object.prototype.toString.call(value) === "[object Array]";
 }
 
@@ -24,7 +24,6 @@ export function assignParams(params: unknown, defaultParams: unknown): BasicPara
     } else if (isObject(params)) {
       assignedParams = params;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {}
 
   return assignedParams;
@@ -32,13 +31,13 @@ export function assignParams(params: unknown, defaultParams: unknown): BasicPara
 
 export function getFinalOptions(
   options?: unknown,
-): Record<keyof OptionWithParams<AxiosResponse<{}>, any, any>, any> {
+): Record<keyof OptionWithParams<AxiosResponse<{}>, unknown, unknown>, any> {
   const defaultOptions = {
     manual: false,
     defaultLoading: null,
     defaultParams: undefined,
     initialData: {},
-    formatter: (res: any) => res.data,
+    formatter: (res: AxiosResponse<{}>) => res.data,
   };
   if (isObject(options)) {
     return {
@@ -75,10 +74,10 @@ export function enhanceError(
   error: Error,
   config: AxiosRequestConfig,
   code: string,
-  request: any,
-  response: AxiosResponse<any>,
-): AxiosError<any> {
-  const err = Object.create({});
+  request: unknown,
+  response: AxiosResponse<unknown>,
+): AxiosError<unknown> {
+  const err: AxiosError<unknown> = Object.create({});
 
   Object.defineProperties(err, {
     message: {
@@ -134,7 +133,7 @@ export function enhanceError(
     },
   });
 
-  return err as AxiosError<any>;
+  return err;
 }
 
 export function verifyResponseAsAxiosResponse(res: unknown): boolean {

@@ -1,24 +1,24 @@
 import { AxiosResponse, AxiosError } from "axios";
 
 export type BasicParams =
-  | Array<any>
+  | Array<unknown>
   | number
   | string
   | boolean
   | undefined
-  | Record<PropertyKey, any>;
+  | Record<PropertyKey, unknown>;
 
 export type Fetching = null | boolean;
 
 // service function with params
-export type Service<R extends AxiosResponse<any>, P extends BasicParams> = (
+export type Service<R extends AxiosResponse<unknown>, P extends BasicParams> = (
   params: P,
 ) => Promise<R>;
 // service function without params
-export type ServiceWithoutParams<R extends AxiosResponse<any>> = () => Promise<R>;
+export type ServiceWithoutParams<R extends AxiosResponse<unknown>> = () => Promise<R>;
 
 // result with format
-interface BasicResult<R extends AxiosResponse<any>, D extends any> {
+interface BasicResult<R extends AxiosResponse<unknown>, D extends unknown> {
   // is executing service(Promise that service returned whether or not resolved/rejected)
   loading: boolean;
 
@@ -40,21 +40,21 @@ interface BasicResult<R extends AxiosResponse<any>, D extends any> {
 }
 
 // service without params
-export interface ResultWithoutParams<R extends AxiosResponse<any>, D extends any>
+export interface ResultWithoutParams<R extends AxiosResponse<unknown>, D extends unknown>
   extends BasicResult<R, D> {
   // manually invoke service, and params will passed if service has arguments.
   run: () => Promise<void>;
 }
 
 // service with params
-export interface ResultWithParams<R extends AxiosResponse<any>, P, D extends any, S>
+export interface ResultWithParams<R extends AxiosResponse<unknown>, P, D extends unknown, S>
   extends BasicResult<R, D> {
   run: S extends (params: P) => Promise<R>
     ? (params: P) => Promise<void>
     : (params?: P) => Promise<void>;
 }
 
-interface BasicOptions<R extends AxiosResponse<any>, D> {
+interface BasicOptions<R extends AxiosResponse<unknown>, D> {
   // is manually invoke service
   manual: boolean;
 
@@ -71,7 +71,8 @@ interface BasicOptions<R extends AxiosResponse<any>, D> {
 }
 
 // service with params and options with formatter
-export interface OptionWithParams<R extends AxiosResponse<any>, P, D> extends BasicOptions<R, D> {
+export interface OptionWithParams<R extends AxiosResponse<unknown>, P, D>
+  extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
   onSuccess: (data: D, params: P, response: R) => void;
   // callback during invoke service
@@ -81,7 +82,8 @@ export interface OptionWithParams<R extends AxiosResponse<any>, P, D> extends Ba
 }
 
 // service without params and options with formatter
-export interface OptionWithoutParams<R extends AxiosResponse<any>, D> extends BasicOptions<R, D> {
+export interface OptionWithoutParams<R extends AxiosResponse<unknown>, D>
+  extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
   onSuccess: (data: D, response: R) => void;
   // callback during invoke service
@@ -91,7 +93,7 @@ export interface OptionWithoutParams<R extends AxiosResponse<any>, D> extends Ba
 /**
  * @description Global Options(not include `formatter` param)
  */
-export type BasicGlobalOptions<R extends AxiosResponse<any>> = {
+export type BasicGlobalOptions<R extends AxiosResponse<unknown>> = {
   // is manually invoke service; if specified local `manual`, ignored.
   manual?: boolean;
 

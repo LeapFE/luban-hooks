@@ -4,7 +4,7 @@ import { AxiosResponse } from "axios";
 import { BasicGlobalOptions } from "./definition";
 import { isObject } from "./share";
 
-function generateGlobalOptionContext<R extends AxiosResponse<any>>(
+function generateGlobalOptionContext<R extends AxiosResponse<unknown>>(
   value: BasicGlobalOptions<R>,
 ): {
   context: Context<BasicGlobalOptions<R>>;

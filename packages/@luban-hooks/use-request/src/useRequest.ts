@@ -10,6 +10,7 @@ import {
   verifyResponseAsAxiosResponse,
   ResponseError,
   isFunction,
+  isObject,
 } from "./share";
 
 import {
@@ -25,10 +26,10 @@ import {
 
 type StateRef = {
   fetching: Fetching;
-  data: any;
+  data: unknown;
   error: AxiosError | null;
   params: BasicParams;
-  response: AxiosResponse<any>;
+  response: AxiosResponse<unknown>;
 };
 
 const validResponseMsg = (serviceName?: string) =>
@@ -37,7 +38,7 @@ const validResponseMsg = (serviceName?: string) =>
 
 // service without params
 function useRequest<
-  R extends AxiosResponse<any>,
+  R extends AxiosResponse<unknown>,
   D = OptionWithoutParams<R, R>["formatter"] extends (res: R) => infer U ? U : R["data"]
 >(
   service: ServiceWithoutParams<R>,
@@ -46,7 +47,7 @@ function useRequest<
 
 // service with params
 function useRequest<
-  R extends AxiosResponse<any>,
+  R extends AxiosResponse<unknown>,
   P extends BasicParams,
   D = OptionWithParams<R, P, R>["formatter"] extends (res: R) => infer U ? U : R["data"]
 >(
@@ -54,27 +55,31 @@ function useRequest<
   options?: Partial<OptionWithParams<R, P, D>>,
 ): ResultWithParams<R, P, D, Service<R, P>>;
 
-function useRequest(service: any, options?: any) {
+function useRequest(service: unknown, options?: {}) {
   if (!isFunction(service)) {
     throw Error(`service ${service} is not a function`);
   }
 
+  if (!isObject(options)) {
+    throw Error("options is not a object");
+  }
+
   const isServiceWithParams = useMemo(() => /(?=\()\(\w+\)(?!\))/.test(service.toString()), []);
 
-  const promisifyService = (args?: any) => {
-    return new Promise<AxiosResponse<any>>((resolve, reject) => {
+  const promisifyService = (args?: unknown) => {
+    return new Promise<AxiosResponse<unknown>>((resolve, reject) => {
       const result = service(args);
 
       if (isFunction(result.then)) {
         result
-          .then((res: any) => {
+          .then((res: AxiosResponse<unknown>) => {
             if (verifyResponseAsAxiosResponse(res)) {
               resolve(res);
             } else {
               reject(new ResponseError(validResponseMsg(service.name)));
             }
           })
-          .catch((e: any) => reject(e));
+          .catch((e: unknown) => reject(e));
       } else {
         resolve(result);
         console.error(`service function "${service.name}" return value not a Promise`);
@@ -121,7 +126,7 @@ function useRequest(service: any, options?: any) {
   const stateRef = useRef<StateRef>({
     fetching: defaultLoading,
     data: initialData,
-    response: {} as AxiosResponse<any>,
+    response: {} as AxiosResponse<unknown>,
     error: null,
     params: defaultParams,
   });
@@ -160,9 +165,9 @@ function useRequest(service: any, options?: any) {
 
     dispatch({ params: assignedParams });
 
-    let $response: AxiosResponse<any> = {} as AxiosResponse<any>;
+    let $response: AxiosResponse<unknown> = {} as AxiosResponse<unknown>;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       promisifyService(assignedParams)
         .then((response) => {
           $response = response;
@@ -186,7 +191,7 @@ function useRequest(service: any, options?: any) {
 
             resolve();
           } else {
-            reject(Error("response is invalid"));
+            throw new Error("Failed validation, response invalid");
           }
         })
         .catch((error) => {
