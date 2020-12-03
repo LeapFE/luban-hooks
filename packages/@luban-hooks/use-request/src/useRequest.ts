@@ -60,7 +60,7 @@ function useRequest(service: unknown, options?: {}) {
     throw Error(`service ${service} is not a function`);
   }
 
-  if (!isObject(options)) {
+  if (options && !isObject(options)) {
     throw Error("options is not a object");
   }
 
@@ -158,7 +158,7 @@ function useRequest(service: unknown, options?: {}) {
     return () => true;
   }, []);
 
-  const fetch = useCallback(async (params: BasicParams) => {
+  const fetch = useCallback((params: BasicParams) => {
     dispatch({ fetching: true });
 
     const assignedParams = assignParams(params, defaultParams);
