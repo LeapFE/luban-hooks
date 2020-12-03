@@ -26,6 +26,7 @@
     "url": "git+https://github.com/LeapFE/luban-hooks.git"
   },
   "scripts": {
+    "dev": "webpack-dev-server --config example/webpack.config.js",
     "test": "jest",
     "test:coverage": "jest --coverage --color",
     "test:update": "jest -u",
