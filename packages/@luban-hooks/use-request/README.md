@@ -247,7 +247,7 @@ const {
 
 ##### 同时存在 `formatter` 和 `onSuccess` 参数：
 
-当 `formatter` 和 `onSuccess` 参数同时存在时，使用 `onSuccess` 的第一个参数时，需要显式的标明其类型：
+当 `formatter` 和 `onSuccess` 参数同时存在时，使用 `onSuccess` 的第一个参数时，需要显式的标明其类型；`formatter` 参数不存在时，则 `onSuccess` 的第一个参数不需要显示的标明类型：
 
 ```tsx
  const { data: userList, run: fetchUserList } = useRequest(getUserList, {
@@ -255,6 +255,7 @@ const {
    defaultParams: {},
    formatter: (res) => res.data.data,
    // 需要使用 `formatter` 返回的值类型来标明 `onSuccess` 第一个参数的类型，确保 `userList` 的类型被正确的推导
+   // 当 `formatter` 参数不传，`onSuccess` 的第一个参数则不需要显示的标明类型！！！ 
    onSuccess: (data: UserItem[], params, res) => {
      console.log(data, params, res);
    },

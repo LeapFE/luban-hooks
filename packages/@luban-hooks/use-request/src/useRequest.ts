@@ -39,7 +39,11 @@ const validResponseMsg = (serviceName?: string) =>
 // service without params
 function useRequest<
   R extends AxiosResponse<unknown>,
-  D = OptionWithoutParams<R, R>["formatter"] extends (res: R) => infer U ? U : R["data"]
+  D = OptionWithoutParams<R, R>["formatter"] extends (res: R) => R
+    ? R["data"]
+    : OptionWithoutParams<R, R>["formatter"] extends (res: R) => infer U
+    ? U
+    : R["data"]
 >(
   service: ServiceWithoutParams<R>,
   options?: Partial<OptionWithoutParams<R, D>>,
@@ -49,7 +53,11 @@ function useRequest<
 function useRequest<
   R extends AxiosResponse<unknown>,
   P extends BasicParams,
-  D = OptionWithParams<R, P, R>["formatter"] extends (res: R) => infer U ? U : R["data"]
+  D = OptionWithParams<R, P, R>["formatter"] extends (res: R) => R
+    ? R["data"]
+    : OptionWithParams<R, P, R>["formatter"] extends (res: R) => infer U
+    ? U
+    : R["data"]
 >(
   service: Service<R, P>,
   options?: Partial<OptionWithParams<R, P, D>>,
@@ -98,12 +106,16 @@ function useRequest(service: unknown, options?: {}) {
     defaultLoading: globalDefaultLoading,
   } = globalOptions || {};
 
-  const localOptions = getFinalOptions({
-    manual: globalManual,
-    initialData: globalInitialData,
-    defaultLoading: globalDefaultLoading,
-    ...options,
-  });
+  const localOptions = getFinalOptions(
+    Object.assign(
+      {
+        manual: globalManual,
+        initialData: globalInitialData,
+        defaultLoading: globalDefaultLoading,
+      },
+      options,
+    ),
+  );
 
   const {
     manual,
