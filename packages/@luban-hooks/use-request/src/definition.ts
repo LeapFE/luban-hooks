@@ -30,7 +30,7 @@ interface BasicResult<R extends AxiosResponse<unknown>, D extends unknown> {
   response: R;
 
   // exception that while invoke service
-  error: AxiosError<D> | null;
+  error: AxiosError<R["data"]> | null;
 
   // reset all status, set loading(false), set error(null), set data({})
   reset: () => void;
