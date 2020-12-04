@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.6](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.5...@luban-hooks/use-request@1.1.6) (2020-12-04)
+
+
+### Bug Fixes
+
+* **use-reqeuest:** error type of useRequest returned ([b2a8288](https://github.com/LeapFE/luban-hooks/commit/b2a828820f9456ceff82540c21f5b33449c4fc44))
+
+
+
+
+
 ## [1.1.5](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.5-beta.0...@luban-hooks/use-request@1.1.5) (2020-12-03)
 
 **Note:** Version bump only for package @luban-hooks/use-request
