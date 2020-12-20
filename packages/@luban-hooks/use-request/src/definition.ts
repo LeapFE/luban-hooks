@@ -1,12 +1,12 @@
 import { AxiosResponse, AxiosError } from "axios";
 
 export type BasicParams =
-  | Array<unknown>
+  | Array<any>
   | number
   | string
   | boolean
   | undefined
-  | Record<PropertyKey, unknown>;
+  | Record<string | number, any>;
 
 export type Fetching = null | boolean;
 

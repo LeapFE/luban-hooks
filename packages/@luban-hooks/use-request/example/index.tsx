@@ -12,16 +12,16 @@ interface Response<T> {
   data: T;
 }
 
-type UserItem = {
+interface UserItem {
   id: number;
   name: string;
-};
+}
 
-type getUserListQuery = {
+interface GetUserListQuery {
   name?: string;
-};
+}
 
-function getUserList(params: getUserListQuery) {
+function getUserList(params: GetUserListQuery) {
   const url = params.name ? `/api/users?name=${params.name}` : "/api/users";
   return request.get<Response<UserItem[]>>(url);
 }
