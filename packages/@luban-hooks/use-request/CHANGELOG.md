@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.7](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.6...@luban-hooks/use-request@1.1.7) (2020-12-23)
+
+
+### Reverts
+
+* **luban-hooks:** type error ([f7aec13](https://github.com/LeapFE/luban-hooks/commit/f7aec135da25d742c456388b959f2ec9797416b6))
+
+
+
+
+
 ## [1.1.6](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.5...@luban-hooks/use-request@1.1.6) (2020-12-04)
 
 
