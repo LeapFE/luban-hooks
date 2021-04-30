@@ -126,6 +126,7 @@ function useRequest(service: unknown, options?: {}) {
     initialData,
     formatter,
     verifyResponse,
+    update,
   } = localOptions;
 
   const stateDependenciesRef = useRef({
@@ -260,14 +261,28 @@ function useRequest(service: unknown, options?: {}) {
     return Promise.resolve(fetch(stateRef.current.params));
   };
 
+  const setData = (setter: (data: unknown) => unknown) => {
+    const nextData = setter(stateRef.current.data);
+    if (nextData) {
+      dispatch({ data: nextData });
+    }
+  };
+
   useEffect(() => {
     if (!manual) {
       fetch(defaultParams);
     }
   }, []);
 
+  useEffect(() => {
+    if (manual && update) {
+      dispatch({ data: initialData });
+    }
+  }, [manual, update]);
+
   return useMemo(() => {
     const state = {
+      setData,
       reset,
       refresh,
       run: isServiceWithParams ? runWithParams : runWithoutParams,

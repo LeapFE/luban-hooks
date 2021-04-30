@@ -37,6 +37,8 @@ interface BasicResult<R extends AxiosResponse<unknown>, D extends unknown> {
 
   // invoke service, use last params if service has arguments.
   refresh: () => Promise<void>;
+
+  setData: (setter: (data: D) => D | void) => void;
 }
 
 // service without params
@@ -68,6 +70,8 @@ interface BasicOptions<R extends AxiosResponse<unknown>, D> {
   verifyResponse: (response: R) => boolean;
 
   formatter: (response: R) => D;
+
+  update: boolean;
 }
 
 // service with params and options with formatter

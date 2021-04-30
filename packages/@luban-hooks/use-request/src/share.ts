@@ -37,6 +37,7 @@ export function getFinalOptions(
     defaultLoading: null,
     defaultParams: undefined,
     initialData: {},
+    update: false,
     formatter: (res: AxiosResponse<{}>) => res.data,
   };
   if (isObject(options)) {
@@ -49,6 +50,7 @@ export function getFinalOptions(
       initialData: options.initialData || {},
       verifyResponse: options.verifyResponse,
       formatter: options.formatter || defaultOptions.formatter,
+      update: options.update || false,
     };
   }
 
