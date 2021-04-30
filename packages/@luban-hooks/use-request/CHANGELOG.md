@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.8-next.0](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.7...@luban-hooks/use-request@1.1.8-next.0) (2021-04-30)
+
+
+### Features
+
+* **use-request:** return 'setData' that can mutate data ([9606e9e](https://github.com/LeapFE/luban-hooks/commit/9606e9e88d2f1346524d28ca608e2c5562e4d772))
+
+
+
+
+
 ## [1.1.7](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.1.6...@luban-hooks/use-request@1.1.7) (2020-12-23)
 
 
