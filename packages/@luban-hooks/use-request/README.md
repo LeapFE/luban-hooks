@@ -169,6 +169,12 @@ const {
 
 *@type:*`() => Promise<void>`
 
+#### setData
+
+*@description:* 接受一个函数，允许读取或直接修改 `data`。
+
+*@type:*`(setter: (data: D) => D | void) => void;`
+
 
 
 ### 参数
@@ -184,6 +190,14 @@ const {
 ##### manual
 
 *@description:* 是否需要手动触发 service 函数
+
+*@type:*`boolean`
+
+*@default:*`false`
+
+##### update
+
+*@description:* 为 true 时，将会以 `initialData` 更新 `data`
 
 *@type:*`boolean`
 
