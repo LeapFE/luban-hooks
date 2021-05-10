@@ -291,7 +291,7 @@ function useRequest(service: unknown, options?: {}) {
       loading: {
         get: () => {
           stateDependenciesRef.current.fetching = true;
-          return stateRef.current.fetching || false;
+          return stateRef.current.fetching;
         },
       },
       data: {
