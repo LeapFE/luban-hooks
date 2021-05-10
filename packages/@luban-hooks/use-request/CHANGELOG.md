@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.2](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.1...@luban-hooks/use-request@1.2.2) (2021-05-10)
+
+
+### Bug Fixes
+
+* **use-request:** return correctly 'loading' state ([60bf8df](https://github.com/LeapFE/luban-hooks/commit/60bf8df6e5953974e0377817bcb58ef4fb02d144))
+
+
+
+
+
 ## [1.2.1](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.0...@luban-hooks/use-request@1.2.1) (2021-05-01)
 
 **Note:** Version bump only for package @luban-hooks/use-request
