@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.3-next.1](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.2...@luban-hooks/use-request@1.2.3-next.1) (2021-06-25)
+
+
+### Features
+
+* **use-request:** supported 'reFetcherDeps' ([5c74b75](https://github.com/LeapFE/luban-hooks/commit/5c74b75a70aa7dae8af2d9106aef7ebfa8baacfa))
+
+
+
+
+
 ## [1.2.3-next.0](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.2...@luban-hooks/use-request@1.2.3-next.0) (2021-06-25)
 
 **Note:** Version bump only for package @luban-hooks/use-request
