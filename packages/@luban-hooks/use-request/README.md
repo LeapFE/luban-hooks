@@ -95,9 +95,7 @@ const User: FunctionComponent = () => {
   return (
     <ul>
       {/* TODO display user list */}
-      <button type="button" onClick={() => putAddUser({ name: "brendan" })}>
-        Add
-      </button>
+      <button type="button" onClick={() => putAddUser({ name: "brendan" })}>Add</button>
     </ul>
   );
 };
@@ -122,6 +120,8 @@ const {
   onError,
   verifyResponse,
   formatter,
+  update,
+  reFetcherDeps,
 });
 ```
 
@@ -202,6 +202,14 @@ const {
 *@type:*`boolean`
 
 *@default:*`false`
+
+##### reFetcherDeps
+
+*@description:* 设置调用 `run` `refresh` 方法时的依赖，当依赖变化时，`run` `refresh` 方法将不再返回一个记忆回调函数。[这是一个详细的例子](#获取最新的状态)
+
+*@type:*`unknown[]`
+
+*@default:*`[]`
 
 ##### defaultLoading
 
@@ -306,3 +314,65 @@ interface ResponseData<T> {
 
 **`UseRequestProvider` 并不支持全局的 `formatter` 和 `defaultParams` 参数**。
 
+### 获取最新的状态
+比如有以下这个例子：
+```ts
+import React, { FunctionComponent } from "react";
+import axios from "axios";
+import { useRequest } from "@luban-hooks/use-request";
+
+interface ResponseData<T> {
+  code: number;
+  msg?: string;
+  data: T;
+}
+
+function addUser(params: { name: string }) {
+  return request.post<ResponseData<boolean>>(`/user/${params.name}`);
+}
+
+const User: FunctionComponent = () => {
+  const [count, setCount] = useState(0);
+
+  const { run: putAddUser } = useRequest(addUser, {
+    manual: true,
+    onSuccess: (res) => {
+      if (res.code === 1) {
+        console.info(count);
+        // TODO do something
+      }
+    },
+  });
+
+  const addUserAndUpdateCount = () => {
+    setCount(1);
+    putAddUser({ name: "brendan" })
+  };
+
+  return (
+    <ul>
+      {/* TODO display user list */}
+      <button type="button" onClick={addUserAndUpdateCount}>Add</button>
+    </ul>
+  );
+};
+```
+
+上面这个例子在添加用户的同时更新了计数器 count，然后在 `onSuccess` 回调中打印了 `count`，你会发现这里 `count` 的值仍然是 0，但是 `count` 已经确实更新为了 2。
+这是因为 `use-request` 在内部实现时，使用了 `useCallback` 对 `run` 方法进行了处理。可以设置 `reFetcherDeps` 来告诉 `useCallback` 不再返回旧的函数：
+```ts
+// ...
+ const { run: putAddUser } = useRequest(addUser, {
+    manual: true,
+    reFetcherDeps: [count],
+    onSuccess: (res) => {
+      if (res.code === 1) {
+        console.info(count);
+        // TODO do something
+      }
+    },
+  });
+// ...
+```
+
+这样，当在 `onSuccess` 函数再次打印 `count` 时，就是最新的值了。

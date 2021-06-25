@@ -72,6 +72,8 @@ interface BasicOptions<R extends AxiosResponse<unknown>, D> {
   formatter: (response: R) => D;
 
   update: boolean;
+
+  reFetcherDeps: unknown[];
 }
 
 // service with params and options with formatter

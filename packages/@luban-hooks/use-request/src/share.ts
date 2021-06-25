@@ -51,6 +51,7 @@ export function getFinalOptions(
       verifyResponse: options.verifyResponse,
       formatter: options.formatter || defaultOptions.formatter,
       update: options.update || false,
+      reFetcherDeps: options.reFetcherDeps || [],
     };
   }
 
@@ -59,6 +60,7 @@ export function getFinalOptions(
     onError: undefined,
     onSuccess: undefined,
     verifyResponse: undefined,
+    reFetcherDeps: [],
   };
 }
 

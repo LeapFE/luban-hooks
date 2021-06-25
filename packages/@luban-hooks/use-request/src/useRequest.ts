@@ -127,6 +127,7 @@ function useRequest(service: unknown, options?: {}) {
     formatter,
     verifyResponse,
     update,
+    reFetcherDeps,
   } = localOptions;
 
   const stateDependenciesRef = useRef({
@@ -171,74 +172,77 @@ function useRequest(service: unknown, options?: {}) {
     return () => true;
   }, []);
 
-  const fetch = useCallback((params: BasicParams) => {
-    dispatch({ fetching: true });
+  const fetch = useCallback(
+    (params: BasicParams) => {
+      dispatch({ fetching: true });
 
-    const assignedParams = assignParams(params, defaultParams);
+      const assignedParams = assignParams(params, defaultParams);
 
-    dispatch({ params: assignedParams });
+      dispatch({ params: assignedParams });
 
-    let $response: AxiosResponse<unknown> = {} as AxiosResponse<unknown>;
+      let $response: AxiosResponse<unknown> = {} as AxiosResponse<unknown>;
 
-    return new Promise((resolve) => {
-      promisifyService(assignedParams)
-        .then((response) => {
-          $response = response;
+      return new Promise((resolve) => {
+        promisifyService(assignedParams)
+          .then((response) => {
+            $response = response;
 
-          dispatch({ response });
+            dispatch({ response });
 
-          if (verifyResponseCb(response)) {
-            const formattedData = formatter(response);
+            if (verifyResponseCb(response)) {
+              const formattedData = formatter(response);
 
-            dispatch({ data: formattedData });
+              dispatch({ data: formattedData });
 
-            if (isFunction(onSuccess)) {
-              if (isServiceWithParams) {
-                onSuccess(formattedData, assignedParams, response);
-              } else {
-                onSuccess(formattedData, response);
+              if (isFunction(onSuccess)) {
+                if (isServiceWithParams) {
+                  onSuccess(formattedData, assignedParams, response);
+                } else {
+                  onSuccess(formattedData, response);
+                }
+              } else if (isFunction(globalOnSuccess) && !isFunction(onSuccess)) {
+                globalOnSuccess(response);
               }
-            } else if (isFunction(globalOnSuccess) && !isFunction(onSuccess)) {
-              globalOnSuccess(response);
-            }
 
-            resolve();
-          } else {
-            throw new Error("Failed validation, response invalid");
-          }
-        })
-        .catch((error) => {
-          const enhancedError = error.isAxiosError
-            ? error
-            : enhanceError(
-                error,
-                $response.config,
-                $response.statusText,
-                $response.request,
-                $response,
-              );
-
-          dispatch({ error: enhancedError });
-
-          if (error.name === "ResponseError") {
-            console.error(enhancedError);
-          }
-
-          if (isFunction(onError)) {
-            if (isServiceWithParams) {
-              onError(enhancedError, assignedParams);
+              resolve();
             } else {
-              onError(enhancedError);
+              throw new Error("Failed validation, response invalid");
             }
-          } else if (isFunction(globalOnError) && !isFunction(onError)) {
-            globalOnError(enhancedError);
-          }
-        })
-        .finally(() => {
-          dispatch({ fetching: false });
-        });
-    });
-  }, []);
+          })
+          .catch((error) => {
+            const enhancedError = error.isAxiosError
+              ? error
+              : enhanceError(
+                  error,
+                  $response.config,
+                  $response.statusText,
+                  $response.request,
+                  $response,
+                );
+
+            dispatch({ error: enhancedError });
+
+            if (error.name === "ResponseError") {
+              console.error(enhancedError);
+            }
+
+            if (isFunction(onError)) {
+              if (isServiceWithParams) {
+                onError(enhancedError, assignedParams);
+              } else {
+                onError(enhancedError);
+              }
+            } else if (isFunction(globalOnError) && !isFunction(onError)) {
+              globalOnError(enhancedError);
+            }
+          })
+          .finally(() => {
+            dispatch({ fetching: false });
+          });
+      });
+    },
+    [...reFetcherDeps],
+  );
 
   const reset = useCallback(() => {
     dispatch({
