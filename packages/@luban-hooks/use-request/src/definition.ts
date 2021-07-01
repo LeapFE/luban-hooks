@@ -1,4 +1,4 @@
-import { AxiosResponse, AxiosError } from "axios";
+import { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 
 export type BasicParams =
   | Array<any>
@@ -13,9 +13,12 @@ export type Fetching = null | boolean;
 // service function with params
 export type Service<R extends AxiosResponse<unknown>, P extends BasicParams> = (
   params: P,
+  config?: AxiosRequestConfig,
 ) => Promise<R>;
 // service function without params
-export type ServiceWithoutParams<R extends AxiosResponse<unknown>> = () => Promise<R>;
+export type ServiceWithoutParams<R extends AxiosResponse<unknown>> = (
+  config?: AxiosRequestConfig,
+) => Promise<R>;
 
 // result with format
 interface BasicResult<R extends AxiosResponse<unknown>, D extends unknown> {
@@ -38,6 +41,7 @@ interface BasicResult<R extends AxiosResponse<unknown>, D extends unknown> {
   // invoke service, use last params if service has arguments.
   refresh: () => Promise<void>;
 
+  // receive a callback that can read or mutate data.
   setData: (setter: (data: D) => D | void) => void;
 }
 
@@ -51,9 +55,9 @@ export interface ResultWithoutParams<R extends AxiosResponse<unknown>, D extends
 // service with params
 export interface ResultWithParams<R extends AxiosResponse<unknown>, P, D extends unknown, S>
   extends BasicResult<R, D> {
-  run: S extends (params: P) => Promise<R>
+  run: S extends (params: P, config?: AxiosRequestConfig) => Promise<R>
     ? (params: P) => Promise<void>
-    : (params?: P) => Promise<void>;
+    : () => Promise<void>;
 }
 
 interface BasicOptions<R extends AxiosResponse<unknown>, D> {
@@ -69,22 +73,25 @@ interface BasicOptions<R extends AxiosResponse<unknown>, D> {
   // verify response as excepted
   verifyResponse: (response: R) => boolean;
 
+  // transform service function resolved data
   formatter: (response: R) => D;
 
+  // update data based on initialData when it is true
   update: boolean;
 
+  // setting deps that refresh `run` and `refresh`, when deps changed, it will not return memoized callback
   reFetcherDeps: unknown[];
 }
 
 // service with params and options with formatter
-export interface OptionWithParams<R extends AxiosResponse<unknown>, P, D>
+export interface OptionWithParams<R extends AxiosResponse<unknown>, P, D, S>
   extends BasicOptions<R, D> {
   // callback after `verifyResponse` return true
-  onSuccess: (data: D, params: P, response: R) => void;
+  onSuccess: (data: D, response: R, params: P) => void;
   // callback during invoke service
   onError: (error: AxiosError<R["data"]>, params: P) => void;
   // default params
-  defaultParams: P;
+  defaultParams: S extends (config?: AxiosRequestConfig) => Promise<R> ? never : P;
 }
 
 // service without params and options with formatter
@@ -94,6 +101,8 @@ export interface OptionWithoutParams<R extends AxiosResponse<unknown>, D>
   onSuccess: (data: D, response: R) => void;
   // callback during invoke service
   onError: (error: AxiosError<R["data"]>) => void;
+  // default params, this is just type check
+  defaultParams: never;
 }
 
 /**

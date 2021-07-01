@@ -31,7 +31,7 @@ export function assignParams(params: unknown, defaultParams: unknown): BasicPara
 
 export function getFinalOptions(
   options?: unknown,
-): Record<keyof OptionWithParams<AxiosResponse<{}>, unknown, unknown>, any> {
+): Record<keyof OptionWithParams<AxiosResponse<{}>, unknown, unknown, unknown>, any> {
   const defaultOptions = {
     manual: false,
     defaultLoading: null,

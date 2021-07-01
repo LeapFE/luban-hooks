@@ -27,10 +27,10 @@ interface ResponseData<T> {
   data: T;
 }
 
-type UserItem = {
+interface UserItem {
   id: number;
   name: string;
-};
+}
 
 function getUserList(params: getUserListQuery) {
   const url = params.name ? `/users?name=${params.name}` : "/users";
@@ -84,13 +84,12 @@ function addUser(params: { name: string }) {
 const User: FunctionComponent = () => {
    const { run: putAddUser } = useRequest(addUser, {
     manual: true,
-    onSuccess: (res) => {
-      if (res.code === 1) {
+    onSuccess: (data) => {
+      if (data.code === 1) {
         // TODO do something
       }
     },
   });
-
 
   return (
     <ul>
@@ -129,7 +128,7 @@ const {
 
 #### response
 
-*@description:* service 函数返回的数据，其格式是符合 [Axios Response Schema](https://github.com/axios/axios#response-schema) 的。
+*@description:* service 函数返回的数据，其数据结构符合 [Axios Response Schema](https://github.com/axios/axios#response-schema) 的。
 
 *@type*: `AxiosResponse<any> `
 
@@ -239,7 +238,7 @@ const {
 
 *@description:* service 执行成功的回调
 
-*@type:*`(data: AxiosResponse["data"], response: AxiosResponse<any>) => void | (data: AxiosResponse["data"], params: any, response: AxiosResponse<any>) => void;`
+*@type:*`(data: AxiosResponse["data"], response: AxiosResponse<any>) => void | (data: AxiosResponse["data"], response: AxiosResponse<any>, params: any) => void;`
 
 *@default:*`() => undefined`
 
@@ -278,8 +277,8 @@ const {
    formatter: (res) => res.data.data,
    // 需要使用 `formatter` 返回的值类型来标明 `onSuccess` 第一个参数的类型，确保 `userList` 的类型被正确的推导
    // 当 `formatter` 参数不传，`onSuccess` 的第一个参数则不需要显示的标明类型！！！ 
-   onSuccess: (data: UserItem[], params, res) => {
-     console.log(data, params, res);
+   onSuccess: (data: UserItem[], res, params) => {
+     console.log(data, res, params);
    },
  });
 ```
@@ -336,8 +335,8 @@ const User: FunctionComponent = () => {
 
   const { run: putAddUser } = useRequest(addUser, {
     manual: true,
-    onSuccess: (res) => {
-      if (res.code === 1) {
+    onSuccess: (data) => {
+      if (data.code === 1) {
         console.info(count);
         // TODO do something
       }
@@ -365,8 +364,8 @@ const User: FunctionComponent = () => {
  const { run: putAddUser } = useRequest(addUser, {
     manual: true,
     reFetcherDeps: [count],
-    onSuccess: (res) => {
-      if (res.code === 1) {
+    onSuccess: (data) => {
+      if (data.code === 1) {
         console.info(count);
         // TODO do something
       }

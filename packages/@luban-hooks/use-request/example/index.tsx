@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
 import React, { FunctionComponent, CSSProperties, useState, ChangeEvent } from "react";
 import { render } from "react-dom";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 import { useRequest } from "../src";
 
@@ -21,17 +23,22 @@ interface GetUserListQuery {
   name?: string;
 }
 
-function getUserList(params: GetUserListQuery) {
+function getUserListNoParams(config?: AxiosRequestConfig) {
+  const url = "/api/users";
+  return request.get<Response<UserItem[]>>(url, config);
+}
+
+function getUserList(params: GetUserListQuery, config?: AxiosRequestConfig) {
   const url = params.name ? `/api/users?name=${params.name}` : "/api/users";
-  return request.get<Response<UserItem[]>>(url);
+  return request.get<Response<UserItem[]>>(url, config);
 }
 
-function addUser(params: { name: string }) {
-  return request.post<Response<boolean>>(`/api/user/${params.name}`);
+function addUser(params: { name: string }, config?: AxiosRequestConfig) {
+  return request.post<Response<boolean>>(`/api/user/${params.name}`, null, config);
 }
 
-function delUser(params: { id: number }) {
-  return request.delete<Response<boolean>>(`/api/user/${params.id}`);
+function delUser(params: { id: number }, config?: AxiosRequestConfig) {
+  return request.delete<Response<boolean>>(`/api/user/${params.id}`, config);
 }
 
 const style: CSSProperties = {
@@ -46,6 +53,14 @@ const style: CSSProperties = {
 const UserList: FunctionComponent = () => {
   const [value, setValue] = useState<string>("");
 
+  const result = useRequest(getUserListNoParams, {
+    initialData: [],
+    onSuccess: (data) => {
+      console.log(data);
+    },
+  });
+  // console.log("result", result.run());
+
   const { data: userList, run: fetchUserList } = useRequest(getUserList, {
     initialData: { data: [] },
     defaultParams: {},
@@ -53,11 +68,16 @@ const UserList: FunctionComponent = () => {
 
   const { run: putAddUser } = useRequest(addUser, {
     manual: true,
-    onSuccess: (data) => {
+    verifyResponse: (res) => res.data.code === 1,
+    onSuccess: (data, res, params) => {
+      console.log("onSuccess", data, res, params);
       if (data.code === 1) {
         fetchUserList({});
         setValue("");
       }
+    },
+    onError: (err, params) => {
+      console.log("onError", err, params);
     },
   });
 
@@ -82,7 +102,8 @@ const UserList: FunctionComponent = () => {
   };
 
   const handleSearch = () => {
-    fetchUserList({ name: value });
+    // fetchUserList({ name: value });
+    result.run();
   };
 
   const handleAddUser = () => {

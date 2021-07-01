@@ -53,14 +53,14 @@ function useRequest<
 function useRequest<
   R extends AxiosResponse<unknown>,
   P extends BasicParams,
-  D = OptionWithParams<R, P, R>["formatter"] extends (res: R) => R
+  D = OptionWithParams<R, P, R, Service<R, P>>["formatter"] extends (res: R) => R
     ? R["data"]
-    : OptionWithParams<R, P, R>["formatter"] extends (res: R) => infer U
+    : OptionWithParams<R, P, R, Service<R, P>>["formatter"] extends (res: R) => infer U
     ? U
     : R["data"]
 >(
   service: Service<R, P>,
-  options?: Partial<OptionWithParams<R, P, D>>,
+  options?: Partial<OptionWithParams<R, P, D, Service<R, P>>>,
 ): ResultWithParams<R, P, D, Service<R, P>>;
 
 function useRequest(service: unknown, options?: {}) {
@@ -71,8 +71,6 @@ function useRequest(service: unknown, options?: {}) {
   if (options && !isObject(options)) {
     throw Error("options is not a object");
   }
-
-  const isServiceWithParams = useMemo(() => /(?=\()\(\w+\)(?!\))/.test(service.toString()), []);
 
   const promisifyService = (args?: unknown) => {
     return new Promise<AxiosResponse<unknown>>((resolve, reject) => {
@@ -195,11 +193,7 @@ function useRequest(service: unknown, options?: {}) {
               dispatch({ data: formattedData });
 
               if (isFunction(onSuccess)) {
-                if (isServiceWithParams) {
-                  onSuccess(formattedData, assignedParams, response);
-                } else {
-                  onSuccess(formattedData, response);
-                }
+                onSuccess(formattedData, response, assignedParams);
               } else if (isFunction(globalOnSuccess) && !isFunction(onSuccess)) {
                 globalOnSuccess(response);
               }
@@ -227,11 +221,7 @@ function useRequest(service: unknown, options?: {}) {
             }
 
             if (isFunction(onError)) {
-              if (isServiceWithParams) {
-                onError(enhancedError, assignedParams);
-              } else {
-                onError(enhancedError);
-              }
+              onError(enhancedError, assignedParams);
             } else if (isFunction(globalOnError) && !isFunction(onError)) {
               globalOnError(enhancedError);
             }
@@ -253,12 +243,8 @@ function useRequest(service: unknown, options?: {}) {
     });
   }, []);
 
-  const runWithParams = (params?: BasicParams) => {
+  const run = (params?: BasicParams) => {
     return Promise.resolve(fetch(params));
-  };
-
-  const runWithoutParams = () => {
-    return Promise.resolve(fetch(undefined));
   };
 
   const refresh = () => {
@@ -289,7 +275,7 @@ function useRequest(service: unknown, options?: {}) {
       setData,
       reset,
       refresh,
-      run: isServiceWithParams ? runWithParams : runWithoutParams,
+      run: run,
     };
     Object.defineProperties(state, {
       loading: {
