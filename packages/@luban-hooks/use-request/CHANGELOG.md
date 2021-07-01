@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.3-next.2](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.3-next.1...@luban-hooks/use-request@1.2.3-next.2) (2021-07-01)
+
+
+### Features
+
+* **use-request:** remove the judgment on whether the service has args ([8333172](https://github.com/LeapFE/luban-hooks/commit/8333172511b7ac407b4ff1be01b1238a11d520f9))
+
+
+
+
+
 ## [1.2.3-next.1](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.2...@luban-hooks/use-request@1.2.3-next.1) (2021-06-25)
 
 
