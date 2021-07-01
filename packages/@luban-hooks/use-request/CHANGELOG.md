@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.3-next.3](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.3-next.2...@luban-hooks/use-request@1.2.3-next.3) (2021-07-01)
+
+
+### Bug Fixes
+
+* **use-request:** allow pass reqeust config ([4eb5eb0](https://github.com/LeapFE/luban-hooks/commit/4eb5eb0506be3a60ed0f747ef6b421dba3323e91))
+
+
+
+
+
 ## [1.2.3-next.2](https://github.com/LeapFE/luban-hooks/compare/@luban-hooks/use-request@1.2.3-next.1...@luban-hooks/use-request@1.2.3-next.2) (2021-07-01)
 
 
