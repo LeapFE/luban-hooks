@@ -49,15 +49,15 @@ interface BasicResult<R extends AxiosResponse<unknown>, D extends unknown> {
 export interface ResultWithoutParams<R extends AxiosResponse<unknown>, D extends unknown>
   extends BasicResult<R, D> {
   // manually invoke service, and params will passed if service has arguments.
-  run: () => Promise<void>;
+  run: (config?: AxiosRequestConfig) => Promise<void>;
 }
 
 // service with params
 export interface ResultWithParams<R extends AxiosResponse<unknown>, P, D extends unknown, S>
   extends BasicResult<R, D> {
   run: S extends (params: P, config?: AxiosRequestConfig) => Promise<R>
-    ? (params: P) => Promise<void>
-    : () => Promise<void>;
+    ? (params: P, config?: AxiosRequestConfig) => Promise<void>
+    : (config?: AxiosRequestConfig) => Promise<void>;
 }
 
 interface BasicOptions<R extends AxiosResponse<unknown>, D> {
@@ -81,6 +81,9 @@ interface BasicOptions<R extends AxiosResponse<unknown>, D> {
 
   // setting deps that refresh `run` and `refresh`, when deps changed, it will not return memoized callback
   reFetcherDeps: unknown[];
+
+  // config request. see https://github.com/axios/axios#request-config
+  config: AxiosRequestConfig;
 }
 
 // service with params and options with formatter

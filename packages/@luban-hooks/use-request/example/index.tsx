@@ -33,8 +33,8 @@ function getUserList(params: GetUserListQuery, config?: AxiosRequestConfig) {
   return request.get<Response<UserItem[]>>(url, config);
 }
 
-function addUser(params: { name: string }, config?: AxiosRequestConfig) {
-  return request.post<Response<boolean>>(`/api/user/${params.name}`, null, config);
+function addUser(query: { name: string }, config?: AxiosRequestConfig) {
+  return request.post<Response<boolean>>(`/api/user/${query.name}`, null, config);
 }
 
 function delUser(params: { id: number }, config?: AxiosRequestConfig) {
@@ -54,16 +54,19 @@ const UserList: FunctionComponent = () => {
   const [value, setValue] = useState<string>("");
 
   const result = useRequest(getUserListNoParams, {
+    // manual: true,
     initialData: [],
     onSuccess: (data) => {
       console.log(data);
     },
+    config: { headers: { name: "viking" } },
   });
-  // console.log("result", result.run());
 
   const { data: userList, run: fetchUserList } = useRequest(getUserList, {
+    manual: true,
     initialData: { data: [] },
     defaultParams: {},
+    config: { headers: {} },
   });
 
   const { run: putAddUser } = useRequest(addUser, {
@@ -102,8 +105,8 @@ const UserList: FunctionComponent = () => {
   };
 
   const handleSearch = () => {
-    // fetchUserList({ name: value });
-    result.run();
+    // fetchUserList({ name: value }, { headers: { name: "brendan" } });
+    result.run({ timeout: 3000, headers: { name: "brendan" } });
   };
 
   const handleAddUser = () => {

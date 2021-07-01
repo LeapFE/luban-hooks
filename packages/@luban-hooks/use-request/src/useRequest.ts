@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useCallback, useContext, useMemo, useRef } from "react";
-import { AxiosResponse, AxiosError } from "axios";
+import { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
 
 import { globalOptionsContext } from "./provider";
 import {
@@ -72,9 +72,14 @@ function useRequest(service: unknown, options?: {}) {
     throw Error("options is not a object");
   }
 
-  const promisifyService = (args?: unknown) => {
+  // we check service function argument length to judgement it has params
+  // so when service function has params, arguments[0] must be params and arguments[1] must be axios config
+  // when service function without params, arguments[0] must be axios config
+  const isServiceWithoutParams = useMemo(() => /(?=\()\(\w+\)(?!\))/.test(service.toString()), []);
+
+  const promisifyService = (args?: unknown, config?: AxiosRequestConfig) => {
     return new Promise<AxiosResponse<unknown>>((resolve, reject) => {
-      const result = service(args);
+      const result = isServiceWithoutParams ? service(config) : service(args, config);
 
       if (isFunction(result.then)) {
         result
@@ -126,6 +131,7 @@ function useRequest(service: unknown, options?: {}) {
     verifyResponse,
     update,
     reFetcherDeps,
+    config: axiosConfig,
   } = localOptions;
 
   const stateDependenciesRef = useRef({
@@ -171,7 +177,7 @@ function useRequest(service: unknown, options?: {}) {
   }, []);
 
   const fetch = useCallback(
-    (params: BasicParams) => {
+    (params: BasicParams, config: AxiosRequestConfig = axiosConfig) => {
       dispatch({ fetching: true });
 
       const assignedParams = assignParams(params, defaultParams);
@@ -181,7 +187,7 @@ function useRequest(service: unknown, options?: {}) {
       let $response: AxiosResponse<unknown> = {} as AxiosResponse<unknown>;
 
       return new Promise((resolve) => {
-        promisifyService(assignedParams)
+        promisifyService(assignedParams, config)
           .then((response) => {
             $response = response;
 
@@ -243,8 +249,12 @@ function useRequest(service: unknown, options?: {}) {
     });
   }, []);
 
-  const run = (params?: BasicParams) => {
-    return Promise.resolve(fetch(params));
+  const run = (params: BasicParams, config?: AxiosRequestConfig) => {
+    return Promise.resolve(fetch(params, config));
+  };
+
+  const runWithParams = (config?: AxiosRequestConfig) => {
+    return Promise.resolve(fetch(undefined, config));
   };
 
   const refresh = () => {
@@ -275,7 +285,7 @@ function useRequest(service: unknown, options?: {}) {
       setData,
       reset,
       refresh,
-      run: run,
+      run: isServiceWithoutParams ? runWithParams : run,
     };
     Object.defineProperties(state, {
       loading: {
